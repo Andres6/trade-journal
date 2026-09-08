@@ -5,6 +5,15 @@
 //
 // This mirrors what the original spreadsheet's regex formulas did, but
 // runs server-side instead of relying on Google Sheets' REGEXEXTRACT.
+// Net cash impact depends on both price sign and action:
+//   SOLD: net follows the same sign as price (negative price = debit paid,
+//         positive price = credit received)
+//   BOT:  net is the opposite sign of price (negative price = credit
+//         received, positive price = debit paid)
+function computeNet(action, size, price) {
+  return action === 'SOLD' ? 100 * size * price : -100 * size * price;
+}
+
 function parseOrderText(raw) {
   const text = String(raw || '').trim();
   if (!text) throw new Error('Empty order text');
@@ -33,9 +42,14 @@ function parseOrderText(raw) {
     .trim();
   if (!structure) structure = text;
 
-  const net = -100 * size * price;
+  // Net cash impact depends on both price sign and action:
+  //   SOLD: net follows the same sign as price (negative price = debit paid,
+  //         positive price = credit received)
+  //   BOT:  net is the opposite sign of price (negative price = credit
+  //         received, positive price = debit paid)
+  const net = computeNet(action, size, price);
 
   return { action, size, structure, price, net, raw_text: text };
 }
 
-module.exports = { parseOrderText };
+module.exports = { parseOrderText, computeNet };

@@ -1,5 +1,6 @@
 const axios = require('axios');
 const db = require('../db');
+const { computeNet } = require('./parseOrder');
 
 const AUTH_BASE = 'https://api.schwabapi.com/v1/oauth';
 const API_BASE = 'https://api.schwabapi.com/trader/v1';
@@ -139,16 +140,17 @@ function normalizeTransactions(transactions) {
       const isSell = (item.instruction || '').toUpperCase().includes('SELL');
       const size = Math.abs(item.amount || 0);
       const price = item.price != null ? item.price : 0;
+      const action = isSell ? 'SOLD' : 'BOT';
 
       legs.push({
         schwab_activity_id: `${txn.activityId}-${instrument.symbol}`,
         trade_date: txn.tradeDate,
         underlying: instrument.underlyingSymbol || instrument.symbol,
-        action: isSell ? 'SOLD' : 'BOT',
+        action,
         size,
         structure: instrument.description || instrument.symbol,
-        price: isSell ? -Math.abs(price) : Math.abs(price),
-        net: -100 * size * (isSell ? -Math.abs(price) : Math.abs(price)),
+        price,
+        net: computeNet(action, size, price),
       });
     }
   }

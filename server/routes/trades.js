@@ -1,6 +1,6 @@
 const express = require('express');
 const db = require('../db');
-const { parseOrderText } = require('../lib/parseOrder');
+const { parseOrderText, computeNet } = require('../lib/parseOrder');
 
 const router = express.Router();
 
@@ -36,7 +36,7 @@ router.post('/', (req, res) => {
           error: 'Provide raw_text, or action, size, structure and price',
         });
       }
-      const net = -100 * Number(size) * Number(price);
+      const net = computeNet(action, Number(size), Number(price));
       fields = { action, size: Number(size), structure, price: Number(price), net, raw_text: null };
     }
   } catch (err) {
@@ -69,7 +69,7 @@ router.patch('/:id', (req, res) => {
     price: price !== undefined ? Number(price) : trade.price,
     comment: comment ?? trade.comment,
   };
-  next.net = -100 * next.size * next.price;
+  next.net = computeNet(next.action, next.size, next.price);
 
   db.prepare(
     `UPDATE trades SET trade_date = ?, action = ?, size = ?, structure = ?, price = ?, net = ?, comment = ? WHERE id = ?`
