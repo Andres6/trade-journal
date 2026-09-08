@@ -1,0 +1,579 @@
+/* ---------- Design tokens ---------- */
+:root {
+  --paper: #fbfaf5;
+  --paper-stripe: #eaf1e7;
+  --paper-card: #ffffff;
+  --ink: #1c2620;
+  --ink-faint: #5b6b60;
+  --rule: #c9d3c6;
+  --rule-strong: #9fb0a2;
+  --header: #16211c;
+  --header-ink: #e9efe6;
+  --gain: #1f6f4a;
+  --loss: #9a2f2f;
+  --stamp-open: #2b4c7e;
+
+  --font-display: 'Source Serif 4', Georgia, serif;
+  --font-body: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'IBM Plex Mono', 'SFMono-Regular', Menlo, monospace;
+
+  --radius: 3px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+a {
+  color: inherit;
+}
+
+.mono {
+  font-family: var(--font-mono);
+}
+
+.muted {
+  color: var(--ink-faint);
+}
+
+/* ---------- App shell ---------- */
+.app-shell {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.boot-screen,
+.login-screen {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: var(--font-mono);
+  color: var(--ink-faint);
+  background: var(--paper);
+}
+
+.nav {
+  background: var(--header);
+  color: var(--header-ink);
+  display: flex;
+  align-items: center;
+  gap: 2.5rem;
+  padding: 0.9rem 2rem;
+  border-bottom: 3px solid var(--gain);
+}
+
+.nav-mark {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.3rem;
+  letter-spacing: 0.02em;
+}
+
+.nav-links {
+  display: flex;
+  gap: 1.75rem;
+  flex: 1;
+}
+
+.nav-links a {
+  text-decoration: none;
+  color: rgba(233, 239, 230, 0.72);
+  font-size: 0.92rem;
+  letter-spacing: 0.01em;
+  padding-bottom: 4px;
+  border-bottom: 2px solid transparent;
+}
+
+.nav-links a.active,
+.nav-links a:hover {
+  color: var(--header-ink);
+  border-bottom-color: var(--gain);
+}
+
+.nav-logout {
+  background: none;
+  border: 1px solid rgba(233, 239, 230, 0.3);
+  color: var(--header-ink);
+  padding: 0.4rem 0.9rem;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.nav-logout:hover {
+  border-color: var(--header-ink);
+}
+
+.app-main {
+  flex: 1;
+  padding: 2.5rem 2rem 4rem;
+  max-width: 1080px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+/* ---------- Page layout ---------- */
+.page-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  margin-bottom: 1.75rem;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.eyebrow {
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  font-size: 0.72rem;
+  color: var(--ink-faint);
+  margin-bottom: 0.3rem;
+}
+
+h1 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.9rem;
+  margin: 0;
+}
+
+.net-total-inline {
+  font-size: 1.1rem;
+  color: var(--ink-faint);
+  margin-left: 0.5rem;
+}
+
+h2 {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 1.2rem;
+  margin: 0 0 0.9rem;
+  border-bottom: 1px solid var(--rule);
+  padding-bottom: 0.4rem;
+}
+
+.section {
+  margin-top: 2.5rem;
+}
+
+.button-row {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+}
+
+/* ---------- KPI strip ---------- */
+.kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  overflow: hidden;
+  background: var(--paper-card);
+}
+
+.kpi {
+  padding: 1rem 1.25rem;
+  border-right: 1px solid var(--rule);
+}
+
+.kpi:last-child {
+  border-right: none;
+}
+
+.kpi-label {
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-faint);
+  margin-bottom: 0.35rem;
+}
+
+.kpi-value {
+  font-family: var(--font-mono);
+  font-size: 1.5rem;
+  font-weight: 500;
+}
+
+/* ---------- Ledger table (green-bar paper) ---------- */
+.ledger-table {
+  width: 100%;
+  border-collapse: collapse;
+  background: var(--paper-card);
+  border: 1px solid var(--rule);
+  font-size: 0.9rem;
+}
+
+.ledger-table th {
+  text-align: left;
+  font-weight: 600;
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--ink-faint);
+  padding: 0.6rem 0.8rem;
+  border-bottom: 2px solid var(--rule-strong);
+}
+
+.ledger-table td {
+  padding: 0.55rem 0.8rem;
+  border-bottom: 1px solid var(--rule);
+  vertical-align: top;
+}
+
+.ledger-table tr.stripe {
+  background: var(--paper-stripe);
+}
+
+.symbol-link {
+  font-weight: 600;
+  text-decoration: none;
+  border-bottom: 1px dashed var(--rule-strong);
+}
+
+.symbol-link:hover {
+  border-bottom-color: var(--ink);
+}
+
+.pl-gain {
+  color: var(--gain);
+}
+
+.pl-loss {
+  color: var(--loss);
+}
+
+.action-sold {
+  color: var(--gain);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+.action-bot {
+  color: var(--loss);
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  font-weight: 500;
+}
+
+.empty-state {
+  padding: 1.5rem;
+  text-align: center;
+  color: var(--ink-faint);
+  border: 1px dashed var(--rule);
+  border-radius: var(--radius);
+  background: var(--paper-card);
+}
+
+/* ---------- Rubber-stamp status badge ---------- */
+.stamp {
+  display: inline-block;
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  padding: 0.2rem 0.55rem;
+  border: 2px solid currentColor;
+  border-radius: 2px;
+  transform: rotate(-2deg);
+}
+
+.stamp-open {
+  color: var(--stamp-open);
+}
+
+.stamp-win {
+  color: var(--gain);
+}
+
+.stamp-loss {
+  color: var(--loss);
+}
+
+/* ---------- Forms & buttons ---------- */
+.card {
+  background: var(--paper-card);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  padding: 1.25rem 1.4rem;
+}
+
+.form-card {
+  margin-bottom: 1.5rem;
+}
+
+.form-row {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+  margin-bottom: 0.9rem;
+}
+
+label {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  font-size: 0.82rem;
+  color: var(--ink-faint);
+  margin-bottom: 0.9rem;
+}
+
+.form-row label {
+  margin-bottom: 0;
+}
+
+label.grow {
+  flex: 1;
+  min-width: 200px;
+}
+
+input,
+select,
+textarea {
+  font-family: var(--font-body);
+  font-size: 0.92rem;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--rule-strong);
+  border-radius: var(--radius);
+  padding: 0.5rem 0.65rem;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: 2px solid var(--stamp-open);
+  outline-offset: 1px;
+}
+
+textarea {
+  font-family: var(--font-mono);
+  resize: vertical;
+}
+
+.btn {
+  font-family: var(--font-body);
+  font-size: 0.88rem;
+  font-weight: 500;
+  padding: 0.55rem 1.1rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--rule-strong);
+  background: var(--paper-card);
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.btn:hover {
+  border-color: var(--ink);
+}
+
+.btn-primary {
+  background: var(--header);
+  color: var(--header-ink);
+  border-color: var(--header);
+  text-decoration: none;
+}
+
+.btn-primary:hover {
+  background: #0e1712;
+}
+
+.btn-danger {
+  color: var(--loss);
+  border-color: var(--loss);
+  background: transparent;
+}
+
+.btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--ink-faint);
+  text-decoration: underline;
+  cursor: pointer;
+  font-size: 0.82rem;
+  padding: 0;
+}
+
+.link-btn:hover {
+  color: var(--loss);
+}
+
+.link-btn:disabled {
+  color: var(--gain);
+  text-decoration: none;
+  cursor: default;
+}
+
+.form-error,
+.login-error {
+  color: var(--loss);
+  font-size: 0.85rem;
+  margin-bottom: 0.75rem;
+}
+
+.preview-row {
+  background: var(--paper-stripe);
+  border: 1px dashed var(--rule-strong);
+  border-radius: var(--radius);
+  padding: 0.5rem 0.7rem;
+  font-size: 0.85rem;
+  margin-bottom: 0.9rem;
+}
+
+/* ---------- Tabs ---------- */
+.tabs {
+  display: flex;
+  gap: 0.4rem;
+  margin-bottom: 1.25rem;
+}
+
+.tabs-compact {
+  margin-bottom: 1rem;
+}
+
+.tab {
+  background: none;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  padding: 0.4rem 0.9rem;
+  font-size: 0.82rem;
+  color: var(--ink-faint);
+  cursor: pointer;
+}
+
+.tab.active {
+  background: var(--header);
+  border-color: var(--header);
+  color: var(--header-ink);
+}
+
+/* ---------- Notes ---------- */
+.notes-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.note-card {
+  background: var(--paper-card);
+  border: 1px solid var(--rule);
+  border-left: 3px solid var(--gain);
+  border-radius: var(--radius);
+  padding: 1rem 1.25rem;
+}
+
+.note-head {
+  display: flex;
+  justify-content: space-between;
+  margin-bottom: 0.4rem;
+}
+
+.note-category {
+  text-transform: uppercase;
+  font-size: 0.68rem;
+  letter-spacing: 0.08em;
+  color: var(--gain);
+  font-weight: 600;
+}
+
+.note-date {
+  font-size: 0.75rem;
+  color: var(--ink-faint);
+}
+
+.note-card h3 {
+  margin: 0 0 0.4rem;
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+}
+
+.note-card p {
+  margin: 0 0 0.6rem;
+  white-space: pre-wrap;
+}
+
+/* ---------- Login ---------- */
+.login-card {
+  background: var(--paper-card);
+  border: 1px solid var(--rule);
+  border-top: 4px solid var(--gain);
+  border-radius: var(--radius);
+  padding: 2.5rem;
+  width: 320px;
+  text-align: left;
+}
+
+.login-mark {
+  font-family: var(--font-display);
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-bottom: 0.3rem;
+}
+
+.login-sub {
+  color: var(--ink-faint);
+  font-size: 0.85rem;
+  margin: 0 0 1.5rem;
+}
+
+.login-label {
+  font-size: 0.8rem;
+}
+
+.login-card input {
+  width: 100%;
+  margin-bottom: 1rem;
+}
+
+.login-card .btn {
+  width: 100%;
+}
+
+/* ---------- Responsive ---------- */
+@media (max-width: 720px) {
+  .nav {
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+  .nav-links {
+    order: 3;
+    width: 100%;
+    gap: 1rem;
+    overflow-x: auto;
+  }
+  .kpi-strip {
+    grid-template-columns: repeat(2, 1fr);
+  }
+  .kpi:nth-child(2) {
+    border-right: none;
+  }
+  .app-main {
+    padding: 1.5rem 1rem 3rem;
+  }
+  .ledger-table {
+    font-size: 0.8rem;
+  }
+}
