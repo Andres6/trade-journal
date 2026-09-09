@@ -47,6 +47,7 @@ export default function Dashboard() {
           </div>
         )}
         {!loading && openPositions.length > 0 && (
+          <div className="table-scroll" style={{ '--table-min-width': '600px' }}>
           <table className="ledger-table">
             <colgroup>
               <col style={{ width: '22%' }} />
@@ -84,6 +85,7 @@ export default function Dashboard() {
               ))}
             </tbody>
           </table>
+          </div>
         )}
       </section>
     </div>

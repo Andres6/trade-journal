@@ -94,6 +94,7 @@ export default function Positions() {
         <div className="empty-state">Nothing here yet.</div>
       )}
       {!loading && positions.length > 0 && (
+        <div className="table-scroll" style={{ '--table-min-width': '680px' }}>
         <table className="ledger-table">
           <colgroup>
             <col style={{ width: '16%' }} />
@@ -134,6 +135,7 @@ export default function Positions() {
             ))}
           </tbody>
         </table>
+        </div>
       )}
     </div>
   );

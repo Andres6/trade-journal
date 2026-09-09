@@ -78,53 +78,69 @@ export default function TradeRow({ trade, index, onChanged }) {
 
   return (
     <tr className={rowClass}>
-      <td className="mono">{index + 1}</td>
-      <td>
-        <input
-          type="date"
-          value={form.trade_date}
-          onChange={(e) => setForm({ ...form, trade_date: e.target.value })}
-        />
-      </td>
-      <td>
-        <select value={form.action} onChange={(e) => setForm({ ...form, action: e.target.value })}>
-          <option value="SOLD">SOLD</option>
-          <option value="BOT">BOT</option>
-        </select>
-      </td>
-      <td>
-        <input
-          type="number"
-          min="1"
-          value={form.size}
-          onChange={(e) => setForm({ ...form, size: e.target.value })}
-        />
-      </td>
-      <td>
-        <input value={form.structure} onChange={(e) => setForm({ ...form, structure: e.target.value })} />
-      </td>
-      <td>
-        <input
-          type="number"
-          step="0.01"
-          value={form.price}
-          onChange={(e) => setForm({ ...form, price: e.target.value })}
-        />
-      </td>
-      <td colSpan={2} className="muted">
-        net & running total recalculate on save
-      </td>
-      <td>
-        <input value={form.comment} onChange={(e) => setForm({ ...form, comment: e.target.value })} />
-      </td>
-      <td className="row-actions">
-        {error && <div className="form-error">{error}</div>}
-        <button className="link-btn" onClick={save} disabled={busy}>
-          {busy ? 'saving…' : 'save'}
-        </button>
-        <button className="link-btn" onClick={() => setEditing(false)}>
-          cancel
-        </button>
+      <td colSpan={10} className="trade-edit-cell">
+        <div className="trade-edit-form">
+          <div className="form-row">
+            <label>
+              Date
+              <input
+                type="date"
+                value={form.trade_date}
+                onChange={(e) => setForm({ ...form, trade_date: e.target.value })}
+              />
+            </label>
+            <label>
+              Action
+              <select value={form.action} onChange={(e) => setForm({ ...form, action: e.target.value })}>
+                <option value="SOLD">SOLD</option>
+                <option value="BOT">BOT</option>
+              </select>
+            </label>
+            <label>
+              Size
+              <input
+                type="number"
+                min="1"
+                value={form.size}
+                onChange={(e) => setForm({ ...form, size: e.target.value })}
+              />
+            </label>
+            <label>
+              Price
+              <input
+                type="number"
+                step="0.01"
+                value={form.price}
+                onChange={(e) => setForm({ ...form, price: e.target.value })}
+              />
+            </label>
+          </div>
+          <div className="form-row">
+            <label className="grow">
+              Structure
+              <input
+                value={form.structure}
+                onChange={(e) => setForm({ ...form, structure: e.target.value })}
+              />
+            </label>
+          </div>
+          <div className="form-row">
+            <label className="grow">
+              Comment
+              <input value={form.comment} onChange={(e) => setForm({ ...form, comment: e.target.value })} />
+            </label>
+          </div>
+          <p className="muted trade-edit-hint">Net and running total recalculate on save.</p>
+          {error && <div className="form-error">{error}</div>}
+          <div className="button-row">
+            <button className="btn btn-primary" onClick={save} disabled={busy}>
+              {busy ? 'Saving…' : 'Save'}
+            </button>
+            <button className="btn" onClick={() => setEditing(false)}>
+              Cancel
+            </button>
+          </div>
+        </div>
       </td>
     </tr>
   );

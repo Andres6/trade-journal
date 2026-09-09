@@ -214,6 +214,21 @@ h2 {
 }
 
 /* ---------- Ledger table (green-bar paper) ---------- */
+/* Tables scroll horizontally instead of squeezing columns below a usable
+   width — fixed-width columns plus no-wrap text otherwise overlap badly on
+   narrow screens. Each page sets --table-min-width to its own content. */
+.table-scroll {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+}
+
+.table-scroll .ledger-table {
+  border: none;
+  min-width: var(--table-min-width, 640px);
+}
+
 .ledger-table {
   width: 100%;
   border-collapse: collapse;
@@ -261,6 +276,24 @@ h2 {
 
 .pl-loss {
   color: var(--loss);
+}
+
+.trade-edit-cell {
+  background: var(--paper-stripe);
+  padding: 1rem 1.1rem !important;
+}
+
+.trade-edit-form .form-row {
+  margin-bottom: 0.75rem;
+}
+
+.trade-edit-form label {
+  min-width: 130px;
+}
+
+.trade-edit-hint {
+  font-size: 0.8rem;
+  margin: 0 0 0.75rem;
 }
 
 .row-actions {
@@ -567,6 +600,10 @@ textarea {
     width: 100%;
     gap: 1rem;
     overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .nav-links::-webkit-scrollbar {
+    display: none;
   }
   .kpi-strip {
     grid-template-columns: repeat(2, 1fr);
@@ -578,6 +615,6 @@ textarea {
     padding: 1.5rem 1rem 3rem;
   }
   .ledger-table {
-    font-size: 0.8rem;
+    font-size: 0.82rem;
   }
 }

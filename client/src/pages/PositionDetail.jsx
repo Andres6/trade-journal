@@ -68,6 +68,7 @@ export default function PositionDetail() {
         </div>
       </div>
 
+      <div className="table-scroll" style={{ '--table-min-width': '860px' }}>
       <table className="ledger-table">
         <colgroup>
           <col style={{ width: '3%' }} />
@@ -108,6 +109,7 @@ export default function PositionDetail() {
           )}
         </tbody>
       </table>
+      </div>
 
       <TradeEntryForm positionId={position.id} onAdded={load} />
 
