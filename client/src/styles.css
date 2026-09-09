@@ -45,6 +45,7 @@ a {
 
 .mono {
   font-family: var(--font-mono);
+  white-space: nowrap;
 }
 
 .muted {
@@ -219,6 +220,7 @@ h2 {
   background: var(--paper-card);
   border: 1px solid var(--rule);
   font-size: 0.9rem;
+  table-layout: fixed;
 }
 
 .ledger-table th {
@@ -235,7 +237,8 @@ h2 {
 .ledger-table td {
   padding: 0.55rem 0.8rem;
   border-bottom: 1px solid var(--rule);
-  vertical-align: top;
+  vertical-align: middle;
+  overflow-wrap: break-word;
 }
 
 .ledger-table tr.stripe {
@@ -262,18 +265,17 @@ h2 {
 
 .row-actions {
   display: flex;
-  gap: 0.5rem;
+  flex-wrap: nowrap;
+  gap: 0.6rem;
   align-items: center;
   white-space: nowrap;
 }
 
-.cell-input-narrow {
-  width: 70px;
-}
-
-.ledger-table td input:not(.cell-input-narrow),
+.ledger-table td input,
 .ledger-table td select {
   width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .empty-state {

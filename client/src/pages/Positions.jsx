@@ -95,6 +95,14 @@ export default function Positions() {
       )}
       {!loading && positions.length > 0 && (
         <table className="ledger-table">
+          <colgroup>
+            <col style={{ width: '16%' }} />
+            <col style={{ width: '15%' }} />
+            <col style={{ width: '15%' }} />
+            <col style={{ width: '10%' }} />
+            <col style={{ width: '20%' }} />
+            <col style={{ width: '24%' }} />
+          </colgroup>
           <thead>
             <tr>
               <th>Symbol</th>

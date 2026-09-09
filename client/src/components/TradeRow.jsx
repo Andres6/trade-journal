@@ -96,7 +96,6 @@ export default function TradeRow({ trade, index, onChanged }) {
         <input
           type="number"
           min="1"
-          className="cell-input-narrow"
           value={form.size}
           onChange={(e) => setForm({ ...form, size: e.target.value })}
         />
@@ -108,7 +107,6 @@ export default function TradeRow({ trade, index, onChanged }) {
         <input
           type="number"
           step="0.01"
-          className="cell-input-narrow"
           value={form.price}
           onChange={(e) => setForm({ ...form, price: e.target.value })}
         />

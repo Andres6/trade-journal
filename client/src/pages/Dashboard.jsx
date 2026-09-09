@@ -48,6 +48,13 @@ export default function Dashboard() {
         )}
         {!loading && openPositions.length > 0 && (
           <table className="ledger-table">
+            <colgroup>
+              <col style={{ width: '22%' }} />
+              <col style={{ width: '20%' }} />
+              <col style={{ width: '15%' }} />
+              <col style={{ width: '20%' }} />
+              <col style={{ width: '23%' }} />
+            </colgroup>
             <thead>
               <tr>
                 <th>Symbol</th>
