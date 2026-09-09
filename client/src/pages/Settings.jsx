@@ -141,7 +141,7 @@ export default function Settings() {
                   <tr key={leg.schwab_activity_id || i} className={i % 2 === 1 ? 'stripe' : ''}>
                     <td className="mono">{leg.trade_date?.slice(0, 10)}</td>
                     <td>{leg.underlying}</td>
-                    <td className={leg.action === 'SOLD' ? 'action-sold' : 'action-bot'}>{leg.action}</td>
+                    <td className={`mono ${leg.net >= 0 ? 'pl-gain' : 'pl-loss'}`}>{leg.action}</td>
                     <td className="mono">{leg.size}</td>
                     <td>{leg.structure}</td>
                     <td className="mono">{leg.price}</td>

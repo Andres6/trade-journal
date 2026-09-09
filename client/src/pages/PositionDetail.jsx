@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { api, fmtMoney } from '../lib/api.js';
 import StatusStamp from '../components/StatusStamp.jsx';
 import TradeEntryForm from '../components/TradeEntryForm.jsx';
+import TradeRow from '../components/TradeRow.jsx';
 
 export default function PositionDetail() {
   const { id } = useParams();
@@ -41,12 +42,6 @@ export default function PositionDetail() {
     if (!confirm(`Delete position ${position.symbol} and all its trades? This can't be undone.`)) return;
     await api.deletePosition(id);
     navigate('/positions');
-  }
-
-  async function removeTrade(tradeId) {
-    if (!confirm('Delete this trade?')) return;
-    await api.deleteTrade(tradeId);
-    load();
   }
 
   if (loading) return <div className="page">Loading…</div>;
@@ -90,24 +85,7 @@ export default function PositionDetail() {
         </thead>
         <tbody>
           {position.trades.map((t, i) => (
-            <tr key={t.id} className={i % 2 === 1 ? 'stripe' : ''}>
-              <td className="mono">{i + 1}</td>
-              <td className="mono">{t.trade_date}</td>
-              <td className={t.action === 'SOLD' ? 'action-sold' : 'action-bot'}>{t.action}</td>
-              <td className="mono">{t.size}</td>
-              <td>{t.structure}</td>
-              <td className="mono">{t.price}</td>
-              <td className={`mono ${t.net >= 0 ? 'pl-gain' : 'pl-loss'}`}>{fmtMoney(t.net)}</td>
-              <td className={`mono ${t.cost_basis >= 0 ? 'pl-gain' : 'pl-loss'}`}>
-                {fmtMoney(t.cost_basis)}
-              </td>
-              <td className="muted">{t.comment || ''}</td>
-              <td>
-                <button className="link-btn" onClick={() => removeTrade(t.id)}>
-                  remove
-                </button>
-              </td>
-            </tr>
+            <TradeRow key={t.id} trade={t} index={i} onChanged={load} />
           ))}
           {position.trades.length === 0 && (
             <tr>

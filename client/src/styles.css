@@ -260,18 +260,20 @@ h2 {
   color: var(--loss);
 }
 
-.action-sold {
-  color: var(--gain);
-  font-family: var(--font-mono);
-  font-size: 0.82rem;
-  font-weight: 500;
+.row-actions {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  white-space: nowrap;
 }
 
-.action-bot {
-  color: var(--loss);
-  font-family: var(--font-mono);
-  font-size: 0.82rem;
-  font-weight: 500;
+.cell-input-narrow {
+  width: 70px;
+}
+
+.ledger-table td input:not(.cell-input-narrow),
+.ledger-table td select {
+  width: 100%;
 }
 
 .empty-state {
