@@ -94,15 +94,15 @@ export default function Positions() {
         <div className="empty-state">Nothing here yet.</div>
       )}
       {!loading && positions.length > 0 && (
-        <div className="table-scroll" style={{ '--table-min-width': '680px' }}>
+        <div className="table-scroll" style={{ '--table-min-width': '660px' }}>
         <table className="ledger-table">
           <colgroup>
-            <col style={{ width: '16%' }} />
-            <col style={{ width: '15%' }} />
-            <col style={{ width: '15%' }} />
-            <col style={{ width: '10%' }} />
-            <col style={{ width: '20%' }} />
-            <col style={{ width: '24%' }} />
+            <col style={{ width: '90px' }} />
+            <col style={{ width: '100px' }} />
+            <col style={{ width: '100px' }} />
+            <col style={{ width: '60px' }} />
+            <col style={{ width: '120px' }} />
+            <col style={{ width: '150px' }} />
           </colgroup>
           <thead>
             <tr>

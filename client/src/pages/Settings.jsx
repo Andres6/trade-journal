@@ -121,17 +121,17 @@ export default function Settings() {
             Each row becomes one trade leg. Importing creates the position if it doesn't already exist
             as an open position for that symbol.
           </p>
-          <div className="table-scroll" style={{ '--table-min-width': '760px' }}>
+          <div className="table-scroll" style={{ '--table-min-width': '825px' }}>
           <table className="ledger-table">
             <colgroup>
-              <col style={{ width: '11%' }} />
-              <col style={{ width: '9%' }} />
-              <col style={{ width: '8%' }} />
-              <col style={{ width: '6%' }} />
-              <col style={{ width: '34%' }} />
-              <col style={{ width: '8%' }} />
-              <col style={{ width: '10%' }} />
-              <col style={{ width: '14%' }} />
+              <col style={{ width: '100px' }} />
+              <col style={{ width: '80px' }} />
+              <col style={{ width: '70px' }} />
+              <col style={{ width: '50px' }} />
+              <col style={{ width: '280px' }} />
+              <col style={{ width: '65px' }} />
+              <col style={{ width: '90px' }} />
+              <col style={{ width: '90px' }} />
             </colgroup>
             <thead>
               <tr>

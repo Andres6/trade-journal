@@ -68,19 +68,19 @@ export default function PositionDetail() {
         </div>
       </div>
 
-      <div className="table-scroll" style={{ '--table-min-width': '860px' }}>
+      <div className="table-scroll" style={{ '--table-min-width': '1000px' }}>
       <table className="ledger-table">
         <colgroup>
-          <col style={{ width: '3%' }} />
-          <col style={{ width: '9%' }} />
-          <col style={{ width: '7%' }} />
-          <col style={{ width: '5%' }} />
-          <col style={{ width: '26%' }} />
-          <col style={{ width: '7%' }} />
-          <col style={{ width: '9%' }} />
-          <col style={{ width: '10%' }} />
-          <col style={{ width: '14%' }} />
-          <col style={{ width: '10%' }} />
+          <col style={{ width: '30px' }} />
+          <col style={{ width: '110px' }} />
+          <col style={{ width: '80px' }} />
+          <col style={{ width: '55px' }} />
+          <col style={{ width: '250px' }} />
+          <col style={{ width: '70px' }} />
+          <col style={{ width: '90px' }} />
+          <col style={{ width: '100px' }} />
+          <col style={{ width: '105px' }} />
+          <col style={{ width: '110px' }} />
         </colgroup>
         <thead>
           <tr>

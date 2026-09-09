@@ -47,14 +47,14 @@ export default function Dashboard() {
           </div>
         )}
         {!loading && openPositions.length > 0 && (
-          <div className="table-scroll" style={{ '--table-min-width': '600px' }}>
+          <div className="table-scroll" style={{ '--table-min-width': '560px' }}>
           <table className="ledger-table">
             <colgroup>
-              <col style={{ width: '22%' }} />
-              <col style={{ width: '20%' }} />
-              <col style={{ width: '15%' }} />
-              <col style={{ width: '20%' }} />
-              <col style={{ width: '23%' }} />
+              <col style={{ width: '100px' }} />
+              <col style={{ width: '110px' }} />
+              <col style={{ width: '70px' }} />
+              <col style={{ width: '120px' }} />
+              <col style={{ width: '150px' }} />
             </colgroup>
             <thead>
               <tr>
