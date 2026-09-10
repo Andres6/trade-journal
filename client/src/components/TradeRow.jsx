@@ -6,6 +6,7 @@ export default function TradeRow({ trade, index, onChanged }) {
   const [form, setForm] = useState(null);
   const [error, setError] = useState('');
   const [busy, setBusy] = useState(false);
+  const [showComment, setShowComment] = useState(false);
 
   function startEdit() {
     setForm({
@@ -49,36 +50,52 @@ export default function TradeRow({ trade, index, onChanged }) {
   // Running total columns: profitable (or credit-received) legs are green,
   // debit/loss legs are red — not a fixed color per SOLD vs BOT.
   const netClass = trade.net >= 0 ? 'pl-gain' : 'pl-loss';
+  const columnCount = 9;
 
   if (!editing) {
     return (
-      <tr className={rowClass}>
-        <td className="mono">{index + 1}</td>
-        <td className="mono">{trade.trade_date}</td>
-        <td className={`mono ${netClass}`}>{trade.action}</td>
-        <td className="mono">{trade.size}</td>
-        <td>{trade.structure}</td>
-        <td className="mono">{trade.price}</td>
-        <td className={`mono ${netClass}`}>{fmtMoney(trade.net)}</td>
-        <td className={`mono ${trade.cost_basis >= 0 ? 'pl-gain' : 'pl-loss'}`}>
-          {fmtMoney(trade.cost_basis)}
-        </td>
-        <td className="muted">{trade.comment || ''}</td>
-        <td className="row-actions">
-          <button className="link-btn" onClick={startEdit}>
-            edit
-          </button>
-          <button className="link-btn" onClick={remove}>
-            remove
-          </button>
-        </td>
-      </tr>
+      <>
+        <tr className={rowClass}>
+          <td className="mono">{index + 1}</td>
+          <td className="mono">{trade.trade_date}</td>
+          <td className={`mono ${netClass}`}>{trade.action}</td>
+          <td className="mono">{trade.size}</td>
+          <td>{trade.structure}</td>
+          <td className="mono">{trade.price}</td>
+          <td className={`mono ${netClass}`}>{fmtMoney(trade.net)}</td>
+          <td className={`mono ${trade.cost_basis >= 0 ? 'pl-gain' : 'pl-loss'}`}>
+            {fmtMoney(trade.cost_basis)}
+          </td>
+          <td>
+            <div className="row-actions">
+              {trade.comment && (
+                <button className="link-btn" onClick={() => setShowComment((s) => !s)}>
+                  {showComment ? 'hide note' : 'note'}
+                </button>
+              )}
+              <button className="link-btn" onClick={startEdit}>
+                edit
+              </button>
+              <button className="link-btn" onClick={remove}>
+                remove
+              </button>
+            </div>
+          </td>
+        </tr>
+        {showComment && trade.comment && (
+          <tr className={rowClass}>
+            <td colSpan={columnCount} className="comment-detail">
+              <span className="comment-detail-label">Comment:</span> {trade.comment}
+            </td>
+          </tr>
+        )}
+      </>
     );
   }
 
   return (
     <tr className={rowClass}>
-      <td colSpan={10} className="trade-edit-cell">
+      <td colSpan={columnCount} className="trade-edit-cell">
         <div className="trade-edit-form">
           <div className="form-row">
             <label>

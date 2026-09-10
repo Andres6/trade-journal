@@ -68,19 +68,18 @@ export default function PositionDetail() {
         </div>
       </div>
 
-      <div className="table-scroll" style={{ '--table-min-width': '1000px' }}>
+      <div className="table-scroll" style={{ '--table-min-width': '980px' }}>
       <table className="ledger-table">
         <colgroup>
           <col style={{ width: '30px' }} />
           <col style={{ width: '110px' }} />
           <col style={{ width: '80px' }} />
           <col style={{ width: '55px' }} />
-          <col style={{ width: '250px' }} />
+          <col style={{ width: '285px' }} />
           <col style={{ width: '70px' }} />
           <col style={{ width: '90px' }} />
           <col style={{ width: '100px' }} />
-          <col style={{ width: '105px' }} />
-          <col style={{ width: '110px' }} />
+          <col style={{ width: '160px' }} />
         </colgroup>
         <thead>
           <tr>
@@ -92,7 +91,6 @@ export default function PositionDetail() {
             <th>Price</th>
             <th>Net</th>
             <th>Running total</th>
-            <th>Comment</th>
             <th></th>
           </tr>
         </thead>
@@ -102,7 +100,7 @@ export default function PositionDetail() {
           ))}
           {position.trades.length === 0 && (
             <tr>
-              <td colSpan={10} className="empty-state">
+              <td colSpan={9} className="empty-state">
                 No trades logged yet. Add the first leg below.
               </td>
             </tr>

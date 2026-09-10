@@ -301,7 +301,23 @@ h2 {
   flex-wrap: nowrap;
   gap: 0.6rem;
   align-items: center;
+  justify-content: flex-end;
   white-space: nowrap;
+}
+
+.comment-detail {
+  background: var(--paper-stripe);
+  color: var(--ink-faint);
+  font-size: 0.85rem;
+  padding: 0.6rem 0.8rem !important;
+  white-space: normal;
+  border-top: none;
+}
+
+.comment-detail-label {
+  color: var(--ink);
+  font-weight: 600;
+  margin-right: 0.3rem;
 }
 
 .ledger-table td input,
