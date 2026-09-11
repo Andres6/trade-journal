@@ -81,6 +81,11 @@ a {
   position: relative;
 }
 
+.nav-mark a {
+  color: inherit;
+  text-decoration: none;
+}
+
 .nav-mark {
   font-family: var(--font-display);
   font-weight: 700;
