@@ -78,6 +78,7 @@ a {
   gap: 2.5rem;
   padding: 0.9rem 2rem;
   border-bottom: 3px solid var(--gain);
+  position: relative;
 }
 
 .nav-mark {
@@ -85,6 +86,18 @@ a {
   font-weight: 700;
   font-size: 1.3rem;
   letter-spacing: 0.02em;
+}
+
+.nav-hamburger {
+  display: none;
+  margin-left: auto;
+  background: none;
+  border: none;
+  color: var(--header-ink);
+  font-size: 1.4rem;
+  line-height: 1;
+  padding: 0.2rem 0.3rem;
+  cursor: pointer;
 }
 
 .nav-links {
@@ -106,6 +119,10 @@ a {
 .nav-links a:hover {
   color: var(--header-ink);
   border-bottom-color: var(--gain);
+}
+
+.nav-logout-mobile {
+  display: none;
 }
 
 .nav-logout {
@@ -607,19 +624,52 @@ textarea {
 
 /* ---------- Responsive ---------- */
 @media (max-width: 720px) {
-  .nav {
-    flex-wrap: wrap;
-    gap: 1rem;
+  .nav-hamburger {
+    display: block;
+  }
+  .nav-logout {
+    display: none;
   }
   .nav-links {
-    order: 3;
-    width: 100%;
-    gap: 1rem;
-    overflow-x: auto;
-    scrollbar-width: none;
-  }
-  .nav-links::-webkit-scrollbar {
     display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    gap: 0;
+    background: var(--header);
+    border-bottom: 3px solid var(--gain);
+    box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+    z-index: 30;
+  }
+  .nav-links.open {
+    display: flex;
+  }
+  .nav-links a,
+  .nav-logout-mobile {
+    padding: 0.85rem 1.25rem;
+    border-bottom: 1px solid rgba(233, 239, 230, 0.12);
+    font-size: 0.95rem;
+  }
+  .nav-links a.active,
+  .nav-links a:hover {
+    background: rgba(255, 255, 255, 0.06);
+    border-bottom: 1px solid rgba(233, 239, 230, 0.12);
+  }
+  .nav-logout-mobile {
+    display: block;
+    width: 100%;
+    text-align: left;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    color: rgba(233, 239, 230, 0.72);
+    cursor: pointer;
+  }
+  .nav-logout-mobile:hover {
+    color: var(--header-ink);
   }
   .kpi-strip {
     grid-template-columns: repeat(2, 1fr);
