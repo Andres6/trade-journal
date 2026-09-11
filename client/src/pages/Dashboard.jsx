@@ -31,7 +31,7 @@ export default function Dashboard() {
           <div className="eyebrow">Today's ledger</div>
           <h1>{today}</h1>
         </div>
-        <Link to="/positions" className="btn btn-primary">
+        <Link to="/positions?new=1" className="btn btn-primary">
           + New position
         </Link>
       </div>

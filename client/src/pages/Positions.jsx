@@ -1,16 +1,19 @@
 import React, { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { api, fmtMoney } from '../lib/api.js';
 import StatusStamp from '../components/StatusStamp.jsx';
 
 export default function Positions() {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const [filter, setFilter] = useState('open');
   const [positions, setPositions] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [showForm, setShowForm] = useState(false);
+  const [showForm, setShowForm] = useState(searchParams.get('new') === '1');
   const [symbol, setSymbol] = useState('');
   const [comment, setComment] = useState('');
   const [error, setError] = useState('');
+  const [creating, setCreating] = useState(false);
 
   function load() {
     setLoading(true);
@@ -26,14 +29,19 @@ export default function Positions() {
     e.preventDefault();
     if (!symbol.trim()) return;
     setError('');
+    setCreating(true);
     try {
-      await api.createPosition({ symbol: symbol.trim(), comment: comment.trim() || undefined });
-      setSymbol('');
-      setComment('');
-      setShowForm(false);
-      load();
+      const position = await api.createPosition({
+        symbol: symbol.trim(),
+        comment: comment.trim() || undefined,
+      });
+      // Go straight into the new position so you can start logging trades
+      // right away, instead of landing back on the list and having to
+      // click into it separately.
+      navigate(`/positions/${position.id}`);
     } catch (err) {
       setError(err.message);
+      setCreating(false);
     }
   }
 
@@ -42,7 +50,7 @@ export default function Positions() {
       <div className="page-head">
         <div>
           <div className="eyebrow">Positions</div>
-          <h1>Every symbol you've traded</h1>
+          <h1>Tracking your trades</h1>
         </div>
         <button className="btn btn-primary" onClick={() => setShowForm((s) => !s)}>
           {showForm ? 'Cancel' : '+ New position'}
@@ -71,8 +79,8 @@ export default function Positions() {
             </label>
           </div>
           {error && <div className="form-error">{error}</div>}
-          <button type="submit" className="btn btn-primary">
-            Create position
+          <button type="submit" className="btn btn-primary" disabled={creating}>
+            {creating ? 'Creating…' : 'Create position'}
           </button>
         </form>
       )}
