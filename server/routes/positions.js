@@ -18,11 +18,16 @@ function computePositionTotals(positionId) {
 // GET /api/positions?status=open|closed
 router.get('/', (req, res) => {
   const { status } = req.query;
+  const userId = req.session.userId;
   let rows;
   if (status === 'open' || status === 'closed') {
-    rows = db.prepare('SELECT * FROM positions WHERE status = ? ORDER BY opened_at DESC').all(status);
+    rows = db
+      .prepare('SELECT * FROM positions WHERE user_id = ? AND status = ? ORDER BY opened_at DESC')
+      .all(userId, status);
   } else {
-    rows = db.prepare('SELECT * FROM positions ORDER BY opened_at DESC').all();
+    rows = db
+      .prepare('SELECT * FROM positions WHERE user_id = ? ORDER BY opened_at DESC')
+      .all(userId);
   }
 
   const withTotals = rows.map((p) => {
@@ -37,11 +42,40 @@ router.get('/', (req, res) => {
 
 // GET /api/positions/summary  (dashboard KPIs)
 router.get('/summary', (req, res) => {
-  const openTrades = db.prepare("SELECT COUNT(*) AS c FROM positions WHERE status = 'open'").get().c;
-  const totalPositions = db.prepare('SELECT COUNT(*) AS c FROM positions').get().c;
-  const totalTrades = db.prepare('SELECT COUNT(*) AS c FROM trades').get().c;
+  const userId = req.session.userId;
+  
+  // Get all open positions
+  const openPositions = db
+    .prepare("SELECT id FROM positions WHERE user_id = ? AND status = 'open'")
+    .all(userId);
 
-  const closedIds = db.prepare("SELECT id FROM positions WHERE status = 'closed'").all().map((r) => r.id);
+  const openTradesCount = openPositions.length;
+
+  const totalPositions = db
+    .prepare('SELECT COUNT(*) AS c FROM positions WHERE user_id = ?')
+    .get(userId).c;
+  
+  const totalTrades = db
+    .prepare(
+      `SELECT COUNT(*) AS c FROM trades
+       JOIN positions ON positions.id = trades.position_id
+       WHERE positions.user_id = ?`
+    )
+    .get(userId).c;
+
+  // Calculate Unrealized P/L from open positions
+  let unrealizedPL = 0;
+  for (const p of openPositions) {
+    const { realized_or_running } = computePositionTotals(p.id);
+    unrealizedPL += realized_or_running;
+  }
+
+  // Calculate Realized P/L and Win Rate from closed positions
+  const closedIds = db
+    .prepare("SELECT id FROM positions WHERE user_id = ? AND status = 'closed'")
+    .all(userId)
+    .map((r) => r.id);
+  
   let realizedPL = 0;
   let wins = 0;
   for (const id of closedIds) {
@@ -52,10 +86,11 @@ router.get('/summary', (req, res) => {
   const winRate = closedIds.length ? Math.round((wins / closedIds.length) * 1000) / 10 : null;
 
   res.json({
-    open_positions: openTrades,
+    open_positions: openTradesCount,
     total_positions: totalPositions,
     total_trades: totalTrades,
     realized_pl: Math.round(realizedPL * 100) / 100,
+    unrealized_pl: Math.round(unrealizedPL * 100) / 100,
     closed_positions: closedIds.length,
     win_rate: winRate,
   });
@@ -63,7 +98,9 @@ router.get('/summary', (req, res) => {
 
 // GET /api/positions/:id
 router.get('/:id', (req, res) => {
-  const position = db.prepare('SELECT * FROM positions WHERE id = ?').get(req.params.id);
+  const position = db
+    .prepare('SELECT * FROM positions WHERE id = ? AND user_id = ?')
+    .get(req.params.id, req.session.userId);
   if (!position) return res.status(404).json({ error: 'Position not found' });
   const { trades, realized_or_running } = computePositionTotals(position.id);
   res.json({ ...position, trades, net_total: realized_or_running });
@@ -75,15 +112,17 @@ router.post('/', (req, res) => {
   if (!symbol) return res.status(400).json({ error: 'symbol is required' });
   const openedAt = opened_at || new Date().toISOString().slice(0, 10);
   const info = db
-    .prepare('INSERT INTO positions (symbol, opened_at, comment) VALUES (?, ?, ?)')
-    .run(symbol.toUpperCase(), openedAt, comment || null);
+    .prepare('INSERT INTO positions (symbol, opened_at, comment, user_id) VALUES (?, ?, ?, ?)')
+    .run(symbol.toUpperCase(), openedAt, comment || null, req.session.userId);
   const position = db.prepare('SELECT * FROM positions WHERE id = ?').get(info.lastInsertRowid);
   res.status(201).json(position);
 });
 
 // PATCH /api/positions/:id  { status, comment, closing_remarks, closed_at }
 router.patch('/:id', (req, res) => {
-  const position = db.prepare('SELECT * FROM positions WHERE id = ?').get(req.params.id);
+  const position = db
+    .prepare('SELECT * FROM positions WHERE id = ? AND user_id = ?')
+    .get(req.params.id, req.session.userId);
   if (!position) return res.status(404).json({ error: 'Position not found' });
 
   const { status, comment, closing_remarks, closed_at, symbol } = req.body || {};
@@ -110,7 +149,11 @@ router.patch('/:id', (req, res) => {
 
 // DELETE /api/positions/:id
 router.delete('/:id', (req, res) => {
-  db.prepare('DELETE FROM positions WHERE id = ?').run(req.params.id);
+  const position = db
+    .prepare('SELECT id FROM positions WHERE id = ? AND user_id = ?')
+    .get(req.params.id, req.session.userId);
+  if (!position) return res.status(404).json({ error: 'Position not found' });
+  db.prepare('DELETE FROM positions WHERE id = ?').run(position.id);
   res.json({ ok: true });
 });
 

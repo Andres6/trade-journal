@@ -19,9 +19,15 @@ async function request(path, options = {}) {
 
 export const api = {
   // auth
-  login: (password) => request('/auth/login', { method: 'POST', body: JSON.stringify({ password }) }),
+  login: (username, password) =>
+    request('/auth/login', { method: 'POST', body: JSON.stringify({ username, password }) }),
   logout: () => request('/auth/logout', { method: 'POST' }),
   session: () => request('/auth/session'),
+
+  // guest account management (admin only — server enforces this too)
+  listUsers: () => request('/auth/users'),
+  createUser: (data) => request('/auth/users', { method: 'POST', body: JSON.stringify(data) }),
+  deleteUser: (id) => request(`/auth/users/${id}`, { method: 'DELETE' }),
 
   // positions
   listPositions: (status) => request(`/positions${status ? `?status=${status}` : ''}`),

@@ -36,7 +36,10 @@ export default function Dashboard() {
         </Link>
       </div>
 
-      <KpiStrip summary={summary} />
+      <KpiStrip 
+        summary={summary} 
+        metrics={['open_positions', 'realized_pl', 'unrealized_pl']} 
+      />
 
       <section className="section">
         <h2>Open positions</h2>

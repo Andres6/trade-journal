@@ -4,7 +4,7 @@ const express = require('express');
 const cors = require('cors');
 const session = require('express-session');
 
-const { router: authRouter, requireAuth } = require('./routes/auth');
+const { router: authRouter, requireAuth, requireAdmin } = require('./routes/auth');
 const positionsRouter = require('./routes/positions');
 const tradesRouter = require('./routes/trades');
 const notesRouter = require('./routes/notes');
@@ -29,11 +29,13 @@ app.use(
 );
 
 // Auth routes are open (that's how you log in); everything else needs a session.
+// Schwab is admin-only — it's one shared brokerage connection, not something
+// each guest account gets their own copy of.
 app.use('/api/auth', authRouter);
 app.use('/api/positions', requireAuth, positionsRouter);
 app.use('/api/trades', requireAuth, tradesRouter);
 app.use('/api/notes', requireAuth, notesRouter);
-app.use('/api/schwab', requireAuth, schwabRouter);
+app.use('/api/schwab', requireAuth, requireAdmin, schwabRouter);
 
 // Schwab redirects the browser here directly, outside the fetch/XHR session
 // flow above still applies since the browser carries the session cookie.

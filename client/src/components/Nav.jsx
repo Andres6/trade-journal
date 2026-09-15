@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { api } from '../lib/api.js';
 
-export default function Nav({ onLogout }) {
+export default function Nav({ onLogout, isAdmin, username }) {
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
 
@@ -21,7 +21,7 @@ export default function Nav({ onLogout }) {
     <header className="nav">
       <div className="nav-mark">
         <NavLink to="/" className={({ isActive }) => (isActive ? 'active' : '')}>
-          Dre's Ledger
+          M.G.I. Options
         </NavLink>
       </div>
 
@@ -44,14 +44,17 @@ export default function Nav({ onLogout }) {
         <NavLink to="/notes" className={({ isActive }) => (isActive ? 'active' : '')}>
           Notes &amp; Lessons
         </NavLink>
-        <NavLink to="/settings" className={({ isActive }) => (isActive ? 'active' : '')}>
-          Settings
-        </NavLink>
+        {isAdmin && (
+          <NavLink to="/settings" className={({ isActive }) => (isActive ? 'active' : '')}>
+            Settings
+          </NavLink>
+        )}
         <button className="nav-logout-mobile" onClick={logout}>
-          Log out
+          Log out{username ? ` (${username})` : ''}
         </button>
       </nav>
 
+      <span className="nav-username">{username}</span>
       <button className="nav-logout" onClick={logout}>
         Log out
       </button>

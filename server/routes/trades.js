@@ -8,6 +8,24 @@ function touchPosition(positionId) {
   db.prepare("UPDATE positions SET updated_at = datetime('now') WHERE id = ?").run(positionId);
 }
 
+// Every trade is reached either via its position_id (create) or its own id
+// (edit/delete) — either way we verify the *position* belongs to the
+// logged-in user before touching anything, since trades don't carry their
+// own user_id.
+function findOwnedPosition(positionId, userId) {
+  return db.prepare('SELECT * FROM positions WHERE id = ? AND user_id = ?').get(positionId, userId);
+}
+
+function findOwnedTrade(tradeId, userId) {
+  return db
+    .prepare(
+      `SELECT trades.* FROM trades
+       JOIN positions ON positions.id = trades.position_id
+       WHERE trades.id = ? AND positions.user_id = ?`
+    )
+    .get(tradeId, userId);
+}
+
 // POST /api/trades/parse  { text }  -> preview only, does not save
 router.post('/parse', (req, res) => {
   try {
@@ -22,7 +40,7 @@ router.post('/parse', (req, res) => {
 router.post('/', (req, res) => {
   const { position_id, trade_date, comment, raw_text } = req.body || {};
   if (!position_id) return res.status(400).json({ error: 'position_id is required' });
-  const position = db.prepare('SELECT * FROM positions WHERE id = ?').get(position_id);
+  const position = findOwnedPosition(position_id, req.session.userId);
   if (!position) return res.status(404).json({ error: 'Position not found' });
 
   let fields;
@@ -57,7 +75,7 @@ router.post('/', (req, res) => {
 
 // PATCH /api/trades/:id
 router.patch('/:id', (req, res) => {
-  const trade = db.prepare('SELECT * FROM trades WHERE id = ?').get(req.params.id);
+  const trade = findOwnedTrade(req.params.id, req.session.userId);
   if (!trade) return res.status(404).json({ error: 'Trade not found' });
 
   const { trade_date, action, size, structure, price, comment } = req.body || {};
@@ -81,9 +99,9 @@ router.patch('/:id', (req, res) => {
 
 // DELETE /api/trades/:id
 router.delete('/:id', (req, res) => {
-  const trade = db.prepare('SELECT * FROM trades WHERE id = ?').get(req.params.id);
+  const trade = findOwnedTrade(req.params.id, req.session.userId);
   if (!trade) return res.status(404).json({ error: 'Trade not found' });
-  db.prepare('DELETE FROM trades WHERE id = ?').run(req.params.id);
+  db.prepare('DELETE FROM trades WHERE id = ?').run(trade.id);
   touchPosition(trade.position_id);
   res.json({ ok: true });
 });

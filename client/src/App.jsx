@@ -10,33 +10,35 @@ import Notes from './pages/Notes.jsx';
 import Settings from './pages/Settings.jsx';
 
 export default function App() {
-  const [loggedIn, setLoggedIn] = useState(null); // null = checking
+  const [session, setSession] = useState(null); // null = checking
 
-  useEffect(() => {
+  function refreshSession() {
     api
       .session()
-      .then((s) => setLoggedIn(s.loggedIn))
-      .catch(() => setLoggedIn(false));
-  }, []);
+      .then((s) => setSession(s.loggedIn ? s : false))
+      .catch(() => setSession(false));
+  }
 
-  if (loggedIn === null) {
+  useEffect(refreshSession, []);
+
+  if (session === null) {
     return <div className="boot-screen">Opening the ledger…</div>;
   }
 
-  if (!loggedIn) {
-    return <Login onLoggedIn={() => setLoggedIn(true)} />;
+  if (!session) {
+    return <Login onLoggedIn={refreshSession} />;
   }
 
   return (
     <div className="app-shell">
-      <Nav onLogout={() => setLoggedIn(false)} />
+      <Nav isAdmin={session.isAdmin} username={session.username} onLogout={() => setSession(false)} />
       <main className="app-main">
         <Routes>
           <Route path="/" element={<Dashboard />} />
           <Route path="/positions" element={<Positions />} />
           <Route path="/positions/:id" element={<PositionDetail />} />
           <Route path="/notes" element={<Notes />} />
-          <Route path="/settings" element={<Settings />} />
+          <Route path="/settings" element={<Settings isAdmin={session.isAdmin} />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>

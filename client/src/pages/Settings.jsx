@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { api, fmtMoney } from '../lib/api.js';
 
-export default function Settings() {
+export default function Settings({ isAdmin }) {
   const [connected, setConnected] = useState(null);
   const [days, setDays] = useState(14);
   const [legs, setLegs] = useState([]);
@@ -10,12 +10,24 @@ export default function Settings() {
   const [error, setError] = useState('');
   const [importedIds, setImportedIds] = useState(new Set());
 
+  const [users, setUsers] = useState([]);
+  const [newUsername, setNewUsername] = useState('');
+  const [newPassword, setNewPassword] = useState('');
+  const [userError, setUserError] = useState('');
+  const [creatingUser, setCreatingUser] = useState(false);
+
   function refreshStatus() {
+    if (!isAdmin) return;
     api.schwabStatus().then((s) => setConnected(s.connected));
     api.listPositions('open').then(setOpenPositions);
+    loadUsers();
   }
 
-  useEffect(refreshStatus, []);
+  function loadUsers() {
+    api.listUsers().then(setUsers).catch(() => {});
+  }
+
+  useEffect(refreshStatus, [isAdmin]);
 
   async function connect() {
     setError('');
@@ -61,6 +73,48 @@ export default function Settings() {
     setImportedIds((prev) => new Set(prev).add(leg.schwab_activity_id));
   }
 
+  async function createGuest(e) {
+    e.preventDefault();
+    if (!newUsername.trim() || !newPassword) return;
+    setUserError('');
+    setCreatingUser(true);
+    try {
+      await api.createUser({ username: newUsername.trim(), password: newPassword });
+      setNewUsername('');
+      setNewPassword('');
+      loadUsers();
+    } catch (err) {
+      setUserError(err.message);
+    } finally {
+      setCreatingUser(false);
+    }
+  }
+
+  async function removeGuest(id, username) {
+    if (!confirm(`Remove the guest account "${username}"? This deletes everything in their journal too.`)) {
+      return;
+    }
+    await api.deleteUser(id);
+    loadUsers();
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="page">
+        <div className="page-head">
+          <div>
+            <div className="eyebrow">Settings</div>
+            <h1>Nothing here yet</h1>
+          </div>
+        </div>
+        <p className="muted">
+          Guest accounts don't have any settings to manage — this page is only used by the account
+          owner.
+        </p>
+      </div>
+    );
+  }
+
   return (
     <div className="page">
       <div className="page-head">
@@ -69,6 +123,74 @@ export default function Settings() {
           <h1>Connections</h1>
         </div>
       </div>
+
+      <section className="section">
+        <h2>Guest accounts</h2>
+        <p className="muted">
+          Each guest gets their own completely separate journal — their positions, trades, and notes
+          are invisible to you and to other guests. Handy for showing someone how the app works
+          without exposing your real trades.
+        </p>
+        <div className="card form-card">
+          <form onSubmit={createGuest}>
+            <div className="form-row">
+              <label>
+                Username
+                <input
+                  value={newUsername}
+                  onChange={(e) => setNewUsername(e.target.value)}
+                  placeholder="e.g. guest"
+                  autoCapitalize="none"
+                />
+              </label>
+              <label>
+                Password
+                <input
+                  type="password"
+                  value={newPassword}
+                  onChange={(e) => setNewPassword(e.target.value)}
+                />
+              </label>
+            </div>
+            {userError && <div className="form-error">{userError}</div>}
+            <button type="submit" className="btn btn-primary" disabled={creatingUser}>
+              {creatingUser ? 'Creating…' : 'Create guest account'}
+            </button>
+          </form>
+        </div>
+
+        {users.filter((u) => !u.is_admin).length > 0 && (
+          <table className="ledger-table">
+            <colgroup>
+              <col style={{ width: '40%' }} />
+              <col style={{ width: '40%' }} />
+              <col style={{ width: '20%' }} />
+            </colgroup>
+            <thead>
+              <tr>
+                <th>Username</th>
+                <th>Created</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {users
+                .filter((u) => !u.is_admin)
+                .map((u, i) => (
+                  <tr key={u.id} className={i % 2 === 1 ? 'stripe' : ''}>
+                    <td>{u.username}</td>
+                    <td className="mono">{u.created_at?.slice(0, 10)}</td>
+                    <td>
+                      <button className="link-btn" onClick={() => removeGuest(u.id, u.username)}>
+                        remove
+                      </button>
+                    </td>
+                  </tr>
+                ))}
+            </tbody>
+          </table>
+        )}
+      </section>
 
       <section className="section">
         <h2>Schwab account</h2>

@@ -130,6 +130,12 @@ a {
   display: none;
 }
 
+.nav-username {
+  color: rgba(233, 239, 230, 0.6);
+  font-size: 0.82rem;
+  font-family: var(--font-mono);
+}
+
 .nav-logout {
   background: none;
   border: 1px solid rgba(233, 239, 230, 0.3);
@@ -205,7 +211,8 @@ h2 {
 /* ---------- KPI strip ---------- */
 .kpi-strip {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
+  /* Automatically adjusts columns based on space, minimum 200px per card */
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   border: 1px solid var(--rule);
   border-radius: var(--radius);
   overflow: hidden;
@@ -214,11 +221,15 @@ h2 {
 
 .kpi {
   padding: 1rem 1.25rem;
-  border-right: 1px solid var(--rule);
+  /* Add a bottom border for items that wrap on smaller screens 
+  border-bottom: 1px solid var(--rule);
+  border-right: 1px solid var(--rule); */
 }
 
+/* Remove right border on the last item of a row, and bottom border on the last row */
 .kpi:last-child {
   border-right: none;
+  border-bottom: none;
 }
 
 .kpi-label {
@@ -522,6 +533,7 @@ textarea {
 .tabs {
   display: flex;
   gap: 0.4rem;
+  margin-top: 1.25rem;
   margin-bottom: 1.25rem;
 }
 
@@ -633,6 +645,9 @@ textarea {
     display: block;
   }
   .nav-logout {
+    display: none;
+  }
+  .nav-username {
     display: none;
   }
   .nav-links {

@@ -2,12 +2,14 @@ import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { api, fmtMoney } from '../lib/api.js';
 import StatusStamp from '../components/StatusStamp.jsx';
+import KpiStrip from '../components/KpiStrip.jsx';
 
 export default function Positions() {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const [filter, setFilter] = useState('open');
   const [positions, setPositions] = useState([]);
+  const [summary, setSummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(searchParams.get('new') === '1');
   const [symbol, setSymbol] = useState('');
@@ -17,9 +19,14 @@ export default function Positions() {
 
   function load() {
     setLoading(true);
-    api
-      .listPositions(filter === 'all' ? undefined : filter)
-      .then(setPositions)
+    Promise.all([
+      api.listPositions(filter === 'all' ? undefined : filter),
+      api.summary ? api.summary() : Promise.resolve(null) // Safe fallback depending on your api helper method name
+    ])
+      .then(([posData, summaryData]) => {
+        setPositions(posData);
+        if (summaryData) setSummary(summaryData);
+      })
       .finally(() => setLoading(false));
   }
 
@@ -35,9 +42,6 @@ export default function Positions() {
         symbol: symbol.trim(),
         comment: comment.trim() || undefined,
       });
-      // Go straight into the new position so you can start logging trades
-      // right away, instead of landing back on the list and having to
-      // click into it separately.
       navigate(`/positions/${position.id}`);
     } catch (err) {
       setError(err.message);
@@ -56,6 +60,11 @@ export default function Positions() {
           {showForm ? 'Cancel' : '+ New position'}
         </button>
       </div>
+
+      <KpiStrip 
+        summary={summary} 
+        metrics={['open_positions', 'total_trades', 'realized_pl', 'unrealized_pl', 'win_rate']} 
+      />
 
       {showForm && (
         <form className="card form-card" onSubmit={createPosition}>

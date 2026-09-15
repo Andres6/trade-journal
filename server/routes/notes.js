@@ -4,20 +4,24 @@ const db = require('../db');
 const router = express.Router();
 
 router.get('/', (req, res) => {
-  res.json(db.prepare('SELECT * FROM notes ORDER BY created_at DESC').all());
+  res.json(
+    db.prepare('SELECT * FROM notes WHERE user_id = ? ORDER BY created_at DESC').all(req.session.userId)
+  );
 });
 
 router.post('/', (req, res) => {
   const { category, title, content } = req.body || {};
   if (!content) return res.status(400).json({ error: 'content is required' });
   const info = db
-    .prepare('INSERT INTO notes (category, title, content) VALUES (?, ?, ?)')
-    .run(category || 'Lesson', title || null, content);
+    .prepare('INSERT INTO notes (category, title, content, user_id) VALUES (?, ?, ?, ?)')
+    .run(category || 'Lesson', title || null, content, req.session.userId);
   res.status(201).json(db.prepare('SELECT * FROM notes WHERE id = ?').get(info.lastInsertRowid));
 });
 
 router.patch('/:id', (req, res) => {
-  const note = db.prepare('SELECT * FROM notes WHERE id = ?').get(req.params.id);
+  const note = db
+    .prepare('SELECT * FROM notes WHERE id = ? AND user_id = ?')
+    .get(req.params.id, req.session.userId);
   if (!note) return res.status(404).json({ error: 'Note not found' });
   const { category, title, content } = req.body || {};
   const next = {
@@ -32,7 +36,11 @@ router.patch('/:id', (req, res) => {
 });
 
 router.delete('/:id', (req, res) => {
-  db.prepare('DELETE FROM notes WHERE id = ?').run(req.params.id);
+  const note = db
+    .prepare('SELECT id FROM notes WHERE id = ? AND user_id = ?')
+    .get(req.params.id, req.session.userId);
+  if (!note) return res.status(404).json({ error: 'Note not found' });
+  db.prepare('DELETE FROM notes WHERE id = ?').run(note.id);
   res.json({ ok: true });
 });
 
