@@ -55,6 +55,24 @@ db.exec(`
     updated_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
 
+  -- Calendar events: earnings, economic releases, expirations, reminders.
+  -- user_id is on the table from the start, so this needs no ownership
+  -- backfill the way positions/notes did.
+  CREATE TABLE IF NOT EXISTS events (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER REFERENCES users(id),
+    event_date TEXT NOT NULL,                    -- 'YYYY-MM-DD' (local calendar day)
+    event_time TEXT,                              -- 'HH:MM' 24h, NULL = all-day
+    title TEXT NOT NULL,
+    category TEXT NOT NULL DEFAULT 'Other',       -- Earnings | Economic | Fed | Expiration | Other
+    symbol TEXT,
+    notes TEXT,
+    source TEXT NOT NULL DEFAULT 'manual',        -- 'manual' or a feed name, for future imports
+    external_id TEXT,                             -- feed's own id, so re-imports update instead of duplicate
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );
+
   CREATE TABLE IF NOT EXISTS schwab_tokens (
     id INTEGER PRIMARY KEY CHECK (id = 1),
     access_token TEXT,
@@ -66,6 +84,9 @@ db.exec(`
 
   CREATE INDEX IF NOT EXISTS idx_trades_position ON trades(position_id);
   CREATE INDEX IF NOT EXISTS idx_positions_status ON positions(status);
+  CREATE INDEX IF NOT EXISTS idx_events_date ON events(user_id, event_date);
+  CREATE UNIQUE INDEX IF NOT EXISTS idx_events_external
+    ON events(user_id, source, external_id) WHERE external_id IS NOT NULL;
 `);
 
 // --- Migration: add user_id to positions/notes if this DB predates accounts ---

@@ -49,6 +49,12 @@ export const api = {
   updateNote: (id, data) => request(`/notes/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
   deleteNote: (id) => request(`/notes/${id}`, { method: 'DELETE' }),
 
+  // calendar events
+  listEvents: (start, end) => request(`/events?start=${start}&end=${end}`),
+  createEvent: (data) => request('/events', { method: 'POST', body: JSON.stringify(data) }),
+  updateEvent: (id, data) => request(`/events/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
+  deleteEvent: (id) => request(`/events/${id}`, { method: 'DELETE' }),
+
   // schwab
   schwabStatus: () => request('/schwab/status'),
   schwabAuthUrl: () => request('/schwab/auth-url'),
