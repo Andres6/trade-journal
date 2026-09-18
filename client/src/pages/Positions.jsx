@@ -111,11 +111,12 @@ export default function Positions() {
         <div className="empty-state">Nothing here yet.</div>
       )}
       {!loading && positions.length > 0 && (
-        <div className="table-scroll" style={{ '--table-min-width': '660px' }}>
+        <div className="table-scroll" style={{ '--table-min-width': '750px' }}>
         <table className="ledger-table">
           <colgroup>
             <col style={{ width: '90px' }} />
             <col style={{ width: '100px' }} />
+            <col style={{ width: '120px' }} />
             <col style={{ width: '100px' }} />
             <col style={{ width: '60px' }} />
             <col style={{ width: '120px' }} />
@@ -125,6 +126,7 @@ export default function Positions() {
             <tr>
               <th>Symbol</th>
               <th>Opened</th>
+              <th>Expiration</th>
               <th>Closed</th>
               <th>Trades</th>
               <th>Running total</th>
@@ -140,6 +142,7 @@ export default function Positions() {
                   </Link>
                 </td>
                 <td className="mono">{p.opened_at}</td>
+                <td className="mono">{p.expiration_date || '—'}</td>
                 <td className="mono">{p.closed_at || '—'}</td>
                 <td className="mono">{p.trade_count}</td>
                 <td className={`mono ${p.net_total >= 0 ? 'pl-gain' : 'pl-loss'}`}>

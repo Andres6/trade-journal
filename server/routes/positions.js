@@ -3,6 +3,17 @@ const db = require('../db');
 
 const router = express.Router();
 
+function extractExpirationDate(structure) {
+  // Extract expiration date from structure like "BACKRATIO SPY 100 18 SEP 26 730/700 PUT"
+  // Expected format: digit(s) MONTH digit(s) followed by optional space and more content
+  // Match patterns like "18 SEP 26", "21 AUG 22", etc.
+  const match = structure.match(/\b(\d{1,2})\s+([A-Z]{3})\s+(\d{2})\b/);
+  if (match) {
+    return `${match[1]} ${match[2]} ${match[3]}`;
+  }
+  return null;
+}
+
 function computePositionTotals(positionId) {
   const trades = db
     .prepare('SELECT * FROM trades WHERE position_id = ? ORDER BY trade_date ASC, id ASC')
@@ -35,7 +46,26 @@ router.get('/', (req, res) => {
     const tradeCount = db
       .prepare('SELECT COUNT(*) AS c FROM trades WHERE position_id = ?')
       .get(p.id).c;
-    return { ...p, net_total: realized_or_running, trade_count: tradeCount };
+    
+    // Get the earliest trade date for this position
+    const earliestTrade = db
+      .prepare('SELECT trade_date, structure FROM trades WHERE position_id = ? ORDER BY trade_date ASC LIMIT 1')
+      .get(p.id);
+    
+    let actualOpenedAt = p.opened_at;
+    let expirationDate = null;
+    if (earliestTrade) {
+      actualOpenedAt = earliestTrade.trade_date;
+      expirationDate = extractExpirationDate(earliestTrade.structure);
+    }
+    
+    return { 
+      ...p, 
+      net_total: realized_or_running, 
+      trade_count: tradeCount,
+      opened_at: actualOpenedAt,
+      expiration_date: expirationDate
+    };
   });
   res.json(withTotals);
 });
@@ -103,7 +133,22 @@ router.get('/:id', (req, res) => {
     .get(req.params.id, req.session.userId);
   if (!position) return res.status(404).json({ error: 'Position not found' });
   const { trades, realized_or_running } = computePositionTotals(position.id);
-  res.json({ ...position, trades, net_total: realized_or_running });
+  
+  // Get the earliest trade date and extract expiration
+  let actualOpenedAt = position.opened_at;
+  let expirationDate = null;
+  if (trades.length > 0) {
+    actualOpenedAt = trades[0].trade_date;
+    expirationDate = extractExpirationDate(trades[0].structure);
+  }
+  
+  res.json({ 
+    ...position, 
+    trades, 
+    net_total: realized_or_running,
+    opened_at: actualOpenedAt,
+    expiration_date: expirationDate
+  });
 });
 
 // POST /api/positions  { symbol, opened_at, comment }
