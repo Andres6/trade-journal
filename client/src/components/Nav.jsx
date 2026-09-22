@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { api } from '../lib/api.js';
+import { ThemeToggle } from './ThemeToggle.jsx';
 
 export default function Nav({ onLogout, isAdmin, username }) {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -52,6 +53,7 @@ export default function Nav({ onLogout, isAdmin, username }) {
             Settings
           </NavLink>
         )}
+        <ThemeToggle />
         <button className="nav-logout-mobile" onClick={logout}>
           Log out{username ? ` (${username})` : ''}
         </button>

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, Navigate } from 'react-router-dom';
 import { api } from './lib/api.js';
+import { useTheme } from './hooks/useTheme.jsx';
 import Nav from './components/Nav.jsx';
 import Login from './pages/Login.jsx';
 import Dashboard from './pages/Dashboard.jsx';
@@ -12,6 +13,7 @@ import Settings from './pages/Settings.jsx';
 
 export default function App() {
   const [session, setSession] = useState(null); // null = checking
+  const { isDark } = useTheme(); // Initialize theme hook
 
   function refreshSession() {
     api

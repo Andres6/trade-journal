@@ -1,5 +1,6 @@
-/* ---------- Design tokens ---------- */
+/* ---------- Design tokens with dark mode support ---------- */
 :root {
+  /* Light mode colors (default) */
   --paper: #fbfaf5;
   --paper-stripe: #eaf1e7;
   --paper-card: #ffffff;
@@ -20,6 +21,22 @@
   --radius: 3px;
 }
 
+/* Dark mode colors */
+[data-theme="dark"] {
+  --paper: #0f1410;
+  --paper-stripe: #1a1f1a;
+  --paper-card: #151a15;
+  --ink: #e0e5e0;
+  --ink-faint: #8a9589;
+  --rule: #2a3129;
+  --rule-strong: #3d4839;
+  --header: #0a0f0a;
+  --header-ink: #d1d8ce;
+  --gain: #1f6f4a;
+  --loss: #d15c5c;
+  --stamp-open: #5fa8d9;
+}
+
 * {
   box-sizing: border-box;
 }
@@ -37,6 +54,8 @@ body {
   font-family: var(--font-body);
   font-size: 15px;
   line-height: 1.5;
+  /* Smooth transition when theme changes */
+  transition: background-color 0.3s ease, color 0.3s ease;
 }
 
 a {
@@ -79,6 +98,7 @@ a {
   padding: 0.9rem 2rem;
   border-bottom: 3px solid var(--gain);
   position: relative;
+  transition: background-color 0.3s ease, border-bottom-color 0.3s ease;
 }
 
 .nav-mark a {
@@ -103,6 +123,11 @@ a {
   line-height: 1;
   padding: 0.2rem 0.3rem;
   cursor: pointer;
+  transition: color 0.3s ease;
+}
+
+.nav-hamburger:hover {
+  color: rgba(233, 239, 230, 0.9);
 }
 
 .nav-links {
@@ -118,6 +143,7 @@ a {
   letter-spacing: 0.01em;
   padding-bottom: 4px;
   border-bottom: 2px solid transparent;
+  transition: color 0.2s ease, border-bottom-color 0.2s ease;
 }
 
 .nav-links a.active,
@@ -144,10 +170,33 @@ a {
   border-radius: var(--radius);
   cursor: pointer;
   font-size: 0.85rem;
+  transition: border-color 0.2s ease, color 0.2s ease;
 }
 
 .nav-logout:hover {
   border-color: var(--header-ink);
+}
+
+/* Theme toggle — styled to match the other nav-links items so it sits
+   naturally in the desktop bar and shows up in the mobile menu. */
+.nav-links button.nav-theme-toggle {
+  background: none;
+  border: none;
+  font-family: inherit;
+  text-decoration: none;
+  color: rgba(233, 239, 230, 0.72);
+  font-size: 0.92rem;
+  letter-spacing: 0.01em;
+  padding-bottom: 4px;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: color 0.2s ease, border-bottom-color 0.2s ease;
+}
+
+.nav-links button.nav-theme-toggle:hover {
+  color: var(--header-ink);
+  border-bottom-color: var(--gain);
 }
 
 .app-main {
@@ -196,6 +245,7 @@ h2 {
   margin: 0 0 0.9rem;
   border-bottom: 1px solid var(--rule);
   padding-bottom: 0.4rem;
+  transition: border-bottom-color 0.3s ease;
 }
 
 .section {
@@ -211,22 +261,18 @@ h2 {
 /* ---------- KPI strip ---------- */
 .kpi-strip {
   display: grid;
-  /* Automatically adjusts columns based on space, minimum 200px per card */
   grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
   border: 1px solid var(--rule);
   border-radius: var(--radius);
   overflow: hidden;
   background: var(--paper-card);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .kpi {
   padding: 1rem 1.25rem;
-  /* Add a bottom border for items that wrap on smaller screens 
-  border-bottom: 1px solid var(--rule);
-  border-right: 1px solid var(--rule); */
 }
 
-/* Remove right border on the last item of a row, and bottom border on the last row */
 .kpi:last-child {
   border-right: none;
   border-bottom: none;
@@ -247,14 +293,12 @@ h2 {
 }
 
 /* ---------- Ledger table (green-bar paper) ---------- */
-/* Tables scroll horizontally instead of squeezing columns below a usable
-   width — fixed-width columns plus no-wrap text otherwise overlap badly on
-   narrow screens. Each page sets --table-min-width to its own content. */
 .table-scroll {
   overflow-x: auto;
   -webkit-overflow-scrolling: touch;
   border: 1px solid var(--rule);
   border-radius: var(--radius);
+  transition: border-color 0.3s ease;
 }
 
 .table-scroll .ledger-table {
@@ -269,6 +313,7 @@ h2 {
   border: 1px solid var(--rule);
   font-size: 0.9rem;
   table-layout: fixed;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .ledger-table th {
@@ -280,6 +325,7 @@ h2 {
   color: var(--ink-faint);
   padding: 0.6rem 0.8rem;
   border-bottom: 2px solid var(--rule-strong);
+  transition: border-bottom-color 0.3s ease;
 }
 
 .ledger-table td {
@@ -287,16 +333,22 @@ h2 {
   border-bottom: 1px solid var(--rule);
   vertical-align: middle;
   overflow-wrap: break-word;
+  transition: border-color 0.3s ease, background-color 0.3s ease;
 }
 
 .ledger-table tr.stripe {
   background: var(--paper-stripe);
 }
 
+.ledger-table tbody tr:hover {
+  background-color: var(--paper-stripe);
+}
+
 .symbol-link {
   font-weight: 600;
   text-decoration: none;
   border-bottom: 1px dashed var(--rule-strong);
+  transition: border-bottom-color 0.2s ease;
 }
 
 .symbol-link:hover {
@@ -367,6 +419,7 @@ h2 {
   border: 1px dashed var(--rule);
   border-radius: var(--radius);
   background: var(--paper-card);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 /* ---------- Rubber-stamp status badge ---------- */
@@ -400,6 +453,7 @@ h2 {
   border: 1px solid var(--rule);
   border-radius: var(--radius);
   padding: 1.25rem 1.4rem;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .form-card {
@@ -441,17 +495,25 @@ textarea {
   border: 1px solid var(--rule-strong);
   border-radius: var(--radius);
   padding: 0.5rem 0.65rem;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 input:focus,
 select:focus,
 textarea:focus {
-  outline: 2px solid var(--stamp-open);
-  outline-offset: 1px;
+  outline: none;
+  border-color: var(--gain);
+  box-shadow: 0 0 0 2px rgba(31, 111, 74, 0.12);
+}
+
+[data-theme="dark"] input:focus,
+[data-theme="dark"] select:focus,
+[data-theme="dark"] textarea:focus {
+  box-shadow: 0 0 0 2px rgba(95, 184, 106, 0.2);
 }
 
 textarea {
-  font-family: var(--font-mono);
+  font-family: var(--font-body);
   resize: vertical;
 }
 
@@ -465,6 +527,7 @@ textarea {
   background: var(--paper-card);
   color: var(--ink);
   cursor: pointer;
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.2s ease;
 }
 
 .btn:hover {
@@ -472,9 +535,9 @@ textarea {
 }
 
 .btn-primary {
-  background: var(--header);
+  background: var(--gain);
   color: var(--header-ink);
-  border-color: var(--header);
+  border-color: var(--gain);
   text-decoration: none;
 }
 
@@ -482,10 +545,14 @@ textarea {
   background: #0e1712;
 }
 
+[data-theme="dark"] .btn-primary:hover {
+  background: #050805;
+}
+
 .btn-danger {
-  color: var(--loss);
+  color: var(--paper-card);
   border-color: var(--loss);
-  background: transparent;
+  background: var(--loss);
 }
 
 .btn:disabled {
@@ -501,6 +568,7 @@ textarea {
   cursor: pointer;
   font-size: 0.82rem;
   padding: 0;
+  transition: color 0.2s ease;
 }
 
 .link-btn:hover {
@@ -511,22 +579,6 @@ textarea {
   color: var(--gain);
   text-decoration: none;
   cursor: default;
-}
-
-.form-error,
-.login-error {
-  color: var(--loss);
-  font-size: 0.85rem;
-  margin-bottom: 0.75rem;
-}
-
-.preview-row {
-  background: var(--paper-stripe);
-  border: 1px dashed var(--rule-strong);
-  border-radius: var(--radius);
-  padding: 0.5rem 0.7rem;
-  font-size: 0.85rem;
-  margin-bottom: 0.9rem;
 }
 
 /* ---------- Tabs ---------- */
@@ -549,11 +601,12 @@ textarea {
   font-size: 0.82rem;
   color: var(--ink-faint);
   cursor: pointer;
+  transition: background-color 0.2s ease, color 0.2s ease;
 }
 
 .tab.active {
-  background: var(--header);
-  border-color: var(--header);
+  background: var(--gain);
+  border-color: var(--gain);
   color: var(--header-ink);
 }
 
@@ -570,6 +623,7 @@ textarea {
   border-left: 3px solid var(--gain);
   border-radius: var(--radius);
   padding: 1rem 1.25rem;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .note-head {
@@ -611,6 +665,7 @@ textarea {
   padding: 2.5rem;
   width: 320px;
   text-align: left;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .login-mark {
@@ -662,18 +717,24 @@ textarea {
     border-bottom: 3px solid var(--gain);
     box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
     z-index: 30;
+    transition: background-color 0.3s ease;
   }
   .nav-links.open {
     display: flex;
   }
   .nav-links a,
+  .nav-links button.nav-theme-toggle,
   .nav-logout-mobile {
+    display: block;
+    width: 100%;
+    text-align: left;
     padding: 0.85rem 1.25rem;
     border-bottom: 1px solid rgba(233, 239, 230, 0.12);
     font-size: 0.95rem;
   }
   .nav-links a.active,
-  .nav-links a:hover {
+  .nav-links a:hover,
+  .nav-links button.nav-theme-toggle:hover {
     background: rgba(255, 255, 255, 0.06);
     border-bottom: 1px solid rgba(233, 239, 230, 0.12);
   }
@@ -730,6 +791,11 @@ textarea {
 .cal-cat-fed {
   --cal-accent: #8a6d1f;
 }
+
+[data-theme="dark"] .cal-cat-fed {
+  --cal-accent: #b89e2b;
+}
+
 .cal-cat-expiration {
   --cal-accent: var(--loss);
 }
@@ -743,6 +809,7 @@ textarea {
   border-radius: var(--radius);
   background: var(--paper-card);
   overflow: hidden;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .cal-day-row {
@@ -750,6 +817,7 @@ textarea {
   gap: 1rem;
   padding: 0.7rem 1rem;
   border-bottom: 1px solid var(--rule);
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .cal-day-row:last-child {
@@ -763,6 +831,10 @@ textarea {
 .cal-day-row.is-today {
   background: #fdfbe9;
   box-shadow: inset 3px 0 0 var(--gain);
+}
+
+[data-theme="dark"] .cal-day-row.is-today {
+  background: rgba(95, 184, 106, 0.1);
 }
 
 .cal-day-label {
@@ -814,6 +886,7 @@ textarea {
   font-size: 0.88rem;
   color: var(--ink);
   cursor: pointer;
+  transition: border-color 0.2s ease;
 }
 
 .cal-event:hover {
@@ -847,6 +920,7 @@ textarea {
   font-size: 0.85rem;
   line-height: 1;
   padding: 0.25rem 0.55rem;
+  transition: color 0.2s ease, border-color 0.2s ease;
 }
 
 .cal-add:hover {
@@ -860,13 +934,16 @@ textarea {
   border-radius: var(--radius);
   background: var(--paper-card);
   overflow: hidden;
+  transition: background-color 0.3s ease, border-color 0.3s ease;
 }
 
 .cal-month-head {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  background: var(--header);
+  background: var(--gain);
   color: var(--header-ink);
+  transition: background-color 0.3s ease;
+  font-weight: bold;
 }
 
 .cal-month-head-cell {
@@ -892,6 +969,7 @@ textarea {
   gap: 0.2rem;
   cursor: pointer;
   min-width: 0;
+  transition: background-color 0.3s ease;
 }
 
 .cal-month-cell:nth-child(7n) {
@@ -906,6 +984,10 @@ textarea {
 .cal-month-cell.is-today {
   background: #fdfbe9;
   box-shadow: inset 0 3px 0 var(--gain);
+}
+
+[data-theme="dark"] .cal-month-cell.is-today {
+  background: rgba(95, 184, 106, 0.1);
 }
 
 .cal-month-daynum {
@@ -929,6 +1011,7 @@ textarea {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  transition: background-color 0.2s ease;
 }
 
 .cal-chip:hover {
