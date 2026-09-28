@@ -260,23 +260,30 @@ h2 {
 
 /* ---------- KPI strip ---------- */
 .kpi-strip {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  display: flex;
+  flex-wrap: wrap;
   border: 1px solid var(--rule);
   border-radius: var(--radius);
   overflow: hidden;
   background: var(--paper-card);
   transition: background-color 0.3s ease, border-color 0.3s ease;
+  /*background: var(--rule); /* The background color serves as the border lines */
+  /*gap: 1px; /* Creates 1px spacing showing the background color */
 }
 
 .kpi {
+  flex: 1 1 180px; /* Expands to fill available space evenly */
   padding: 1rem 1.25rem;
+  background: var(--paper-card);
+  /* Interior dividers */
+  border-right: 1px solid var(--rule);
+  border-bottom: 1px solid var(--rule);
 }
 
-.kpi:last-child {
+/*.kpi:last-child {
   border-right: none;
   border-bottom: none;
-}
+}*/
 
 .kpi-label {
   font-size: 0.72rem;
@@ -752,12 +759,7 @@ textarea {
   .nav-logout-mobile:hover {
     color: var(--header-ink);
   }
-  .kpi-strip {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  .kpi:nth-child(2) {
-    border-right: none;
-  }
+
   .app-main {
     padding: 1.5rem 1rem 3rem;
   }
