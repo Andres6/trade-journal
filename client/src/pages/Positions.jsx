@@ -1,6 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { api, fmtMoney } from '../lib/api.js';
+import { fmtDate } from '../lib/dates.js';
+import { useSortedRows } from '../hooks/useSortedRows.js';
+import SortableTh from '../components/SortableTh.jsx';
 import StatusStamp from '../components/StatusStamp.jsx';
 import KpiStrip from '../components/KpiStrip.jsx';
 
@@ -16,6 +19,7 @@ export default function Positions() {
   const [comment, setComment] = useState('');
   const [error, setError] = useState('');
   const [creating, setCreating] = useState(false);
+  const { sorted, sort, toggleSort } = useSortedRows(positions);
 
   function load() {
     setLoading(true);
@@ -125,25 +129,25 @@ export default function Positions() {
           <thead>
             <tr>
               <th>Symbol</th>
-              <th>Opened</th>
-              <th>Expiration</th>
-              <th>Closed</th>
+              <SortableTh label="Opened" sortKey="opened" sort={sort} onSort={toggleSort} />
+              <SortableTh label="Expiration" sortKey="expiration" sort={sort} onSort={toggleSort} />
+              <SortableTh label="Closed" sortKey="closed" sort={sort} onSort={toggleSort} />
               <th>Trades</th>
               <th>Running total</th>
               <th>Status</th>
             </tr>
           </thead>
           <tbody>
-            {positions.map((p, i) => (
+            {sorted.map((p, i) => (
               <tr key={p.id} className={i % 2 === 1 ? 'stripe' : ''}>
                 <td>
                   <Link to={`/positions/${p.id}`} className="symbol-link">
                     {p.symbol}
                   </Link>
                 </td>
-                <td className="mono">{p.opened_at}</td>
-                <td className="mono">{p.expiration_date || '—'}</td>
-                <td className="mono">{p.closed_at || '—'}</td>
+                <td className="mono">{fmtDate(p.opened_at)}</td>
+                <td className="mono">{fmtDate(p.expiration_date)}</td>
+                <td className="mono">{fmtDate(p.closed_at)}</td>
                 <td className="mono">{p.trade_count}</td>
                 <td className={`mono ${p.net_total >= 0 ? 'pl-gain' : 'pl-loss'}`}>
                   {fmtMoney(p.net_total)}

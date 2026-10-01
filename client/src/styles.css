@@ -785,7 +785,7 @@ textarea {
 
 /* Category colours, used by both the week rows and the month chips. */
 .cal-cat-earnings {
-  --cal-accent: var(--gain);
+  --cal-accent: #aa3ed5;
 }
 .cal-cat-economic {
   --cal-accent: var(--stamp-open);
@@ -985,7 +985,7 @@ textarea {
 
 .cal-month-cell.is-today {
   background: #fdfbe9;
-  box-shadow: inset 0 3px 0 var(--gain);
+  box-shadow: inset 0 3px 0 #ff7d7d;
 }
 
 [data-theme="dark"] .cal-month-cell.is-today {
@@ -1065,4 +1065,32 @@ textarea {
     font-size: 0.6rem;
     padding: 0.4rem 0.2rem;
   }
+}
+
+/* ---------- Sortable table headers ---------- */
+.th-sort {
+  all: unset;
+  box-sizing: border-box;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  text-transform: inherit;
+  letter-spacing: inherit;
+  font-weight: inherit;
+  font-size: inherit;
+  color: inherit;
+}
+.th-sort:hover,
+.th-sort.active {
+  color: var(--ink);
+}
+.th-sort:focus-visible {
+  outline: 2px solid var(--gain);
+  outline-offset: 2px;
+}
+.th-sort-arrow {
+  display: inline-block;
+  min-width: 0.7em;
+  font-size: 0.6rem;
 }

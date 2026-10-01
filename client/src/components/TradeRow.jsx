@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { api, fmtMoney } from '../lib/api.js';
+import { fmtDate } from '../lib/dates.js';
 
 export default function TradeRow({ trade, index, onChanged }) {
   const [editing, setEditing] = useState(false);
@@ -57,7 +58,7 @@ export default function TradeRow({ trade, index, onChanged }) {
       <>
         <tr className={rowClass}>
           <td className="mono">{index + 1}</td>
-          <td className="mono">{trade.trade_date}</td>
+          <td className="mono">{fmtDate(trade.trade_date)}</td>
           <td className={`mono ${netClass}`}>{trade.action}</td>
           <td className="mono">{trade.size}</td>
           <td>{trade.structure}</td>

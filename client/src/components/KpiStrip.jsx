@@ -5,6 +5,8 @@ export default function KpiStrip({ summary, metrics }) {
   if (!summary) return null;
   const realizedPlClass = summary.realized_pl >= 0 ? 'pl-gain' : 'pl-loss';
   const unrealizedPlClass = summary.unrealized_pl >= 0 ? 'pl-gain' : 'pl-loss';
+  const netLiq = Math.round((Number(summary.realized_pl || 0) + Number(summary.unrealized_pl || 0)) * 100) / 100;
+  const netLiqClass = netLiq >= 0 ? 'pl-gain' : 'pl-loss';
 
   // Define all available KPI items with unique keys
   const allKpis = {
@@ -25,6 +27,11 @@ export default function KpiStrip({ summary, metrics }) {
       label: 'Unrealized P/L',
       value: fmtMoney(summary.unrealized_pl),
       className: unrealizedPlClass,
+    },
+    net_liq: {
+      label: 'Net Liq.',
+      value: fmtMoney(netLiq),
+      className: netLiqClass,
     },
     win_rate: {
       label: 'Win Rate',
