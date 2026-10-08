@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { api } from '../lib/api.js';
 
 const CATEGORIES = ['Earnings', 'Economic', 'Fed', 'Expiration', 'Other'];
@@ -49,6 +50,22 @@ function catClass(category) {
   return `cal-cat-${String(category || 'other').toLowerCase()}`;
 }
 
+function describeEarnings(e) {
+  if (e.stopped === 'not_configured') return 'Earnings need FINNHUB_API_KEY in server/.env.';
+  const parts = [`${e.added} new, ${e.updated} updated (${e.symbols} symbol${e.symbols === 1 ? '' : 's'})`];
+  if (e.stopped === 'rate') parts.push('stopped early: rate limit, try again in a minute');
+  if (e.stopped === 'auth') parts.push('Finnhub rejected the API key');
+  if (e.failed.length) parts.push(`could not fetch ${e.failed.join(', ')}`);
+  return parts.join(' · ');
+}
+
+function describeEconomic(x) {
+  if (x.status === 'not_configured' || x.status === 'error') return x.message;
+  const head = `${x.added} new, ${x.updated} updated from ${x.scanned} FRED release dates`;
+  const main = x.matched.length ? `${head}. Matched: ${x.matched.join(', ')}` : `${head}. Nothing matched in the next 30 days.`;
+  return x.message ? `${main}. ${x.message}` : main;
+}
+
 const EMPTY_FORM = {
   id: null,
   event_date: '',
@@ -57,10 +74,11 @@ const EMPTY_FORM = {
   category: 'Earnings',
   symbol: '',
   notes: '',
+  source: 'manual',
 };
 
 export default function Calendar() {
-  const [view, setView] = useState('week');
+  const [view, setView] = useState('month');
   const [anchor, setAnchor] = useState(() => midnight(new Date()));
   const [events, setEvents] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -68,6 +86,11 @@ export default function Calendar() {
   const [error, setError] = useState('');
   const [saving, setSaving] = useState(false);
   const formRef = useRef(null);
+  const [feed, setFeed] = useState(null);
+  const [syncing, setSyncing] = useState(false);
+  const [syncMsg, setSyncMsg] = useState('');
+  const [econSyncing, setEconSyncing] = useState(false);
+  const [econMsg, setEconMsg] = useState('');
 
   const todayISO = useMemo(() => toISO(new Date()), []);
 
@@ -106,6 +129,39 @@ export default function Calendar() {
   }
 
   useEffect(load, [startISO, endISO]);
+
+  function loadFeed() {
+    api.calendarStatus().then(setFeed).catch(() => {});
+  }
+  useEffect(loadFeed, []);
+
+  async function runSync() {
+    setSyncing(true);
+    setSyncMsg('');
+    try {
+      const result = await api.calendarSync('earnings');
+      setSyncMsg(describeEarnings(result.earnings));
+      load();
+    } catch (err) {
+      setSyncMsg(err.message);
+    } finally {
+      setSyncing(false);
+    }
+  }
+
+  async function runEconSync() {
+    setEconSyncing(true);
+    setEconMsg('');
+    try {
+      const result = await api.calendarSync('economic');
+      setEconMsg(describeEconomic(result.economic));
+      load();
+    } catch (err) {
+      setEconMsg(err.message);
+    } finally {
+      setEconSyncing(false);
+    }
+  }
 
   const byDate = useMemo(() => {
     const map = {};
@@ -156,6 +212,7 @@ export default function Calendar() {
       category: event.category,
       symbol: event.symbol || '',
       notes: event.notes || '',
+      source: event.source || 'manual',
     });
   }
 
@@ -189,7 +246,8 @@ export default function Calendar() {
 
   async function remove() {
     if (!form?.id) return;
-    if (!confirm('Delete this event?')) return;
+    const fromFeed = form.source !== 'manual';
+    if (!confirm(fromFeed ? 'Remove this event? It will not come back on future syncs.' : 'Delete this event?')) return;
     setSaving(true);
     try {
       await api.deleteEvent(form.id);
@@ -238,6 +296,63 @@ export default function Calendar() {
           ))}
         </div>
       </div>
+
+      <details className="cal-feed">
+        <summary>Earnings feed · Finnhub</summary>
+        <div className="cal-feed-body">
+          {feed && !feed.configured && (
+            <p className="muted">Add FINNHUB_API_KEY to server/.env and restart the server to turn this on.</p>
+          )}
+          <div className="button-row">
+            <button className="btn" onClick={runSync} disabled={syncing || !feed?.configured}>
+              {syncing ? 'Syncing…' : 'Sync earnings'}
+            </button>
+          </div>
+          {syncMsg && <p className="cal-feed-msg">{syncMsg}</p>}
+          <div className="cal-feed-label">
+            Earnings pulled for · {feed?.tracked?.length ?? 0} symbol{feed?.tracked?.length === 1 ? '' : 's'}
+          </div>
+          <div className="sym-list">
+            {[...(feed?.tracked || [])].sort().map((sym) => {
+              const onWatch = (feed.watchlist || []).includes(sym);
+              return (
+                <span
+                  key={sym}
+                  className={`sym-item ${onWatch ? '' : 'is-auto'}`}
+                  title={onWatch ? 'On your watchlist' : 'From open positions'}
+                >
+                  {sym}
+                </span>
+              );
+            })}
+            {feed && feed.tracked.length === 0 && <span className="muted">No symbols yet.</span>}
+          </div>
+          <p className="sym-legend muted">Italic = from open positions. Upright = watchlist.</p>
+          <p className="cal-feed-hint">
+            Open-position symbols are included automatically. To add or remove watchlist tickers,{' '}
+            <Link to="/settings">manage the watchlist in Settings</Link>.
+          </p>
+        </div>
+      </details>
+
+      <details className="cal-feed">
+        <summary>Economic dates feed · FRED</summary>
+        <div className="cal-feed-body">
+          {feed && !feed.fredConfigured && (
+            <p className="muted">Add FRED_API_KEY to server/.env and restart the server to turn this on.</p>
+          )}
+          <p className="cal-feed-hint">
+            CPI, jobs report, GDP, PCE, PPI, retail sales, JOLTS, jobless claims and industrial production
+            for the next 30 days. These are all-day entries; FRED doesn't publish release times.
+          </p>
+          <div className="button-row">
+            <button className="btn" onClick={runEconSync} disabled={econSyncing || !feed?.fredConfigured}>
+              {econSyncing ? 'Syncing…' : 'Sync economic dates'}
+            </button>
+          </div>
+          {econMsg && <p className="cal-feed-msg">{econMsg}</p>}
+        </div>
+      </details>
 
       {form && (
         <form className="card form-card" ref={formRef} onSubmit={save}>
@@ -344,7 +459,7 @@ export default function Calendar() {
                 <div className="cal-day-body">
                   {list.length === 0 && <span className="cal-day-empty">—</span>}
                   {list.map((e) => (
-                    <button key={e.id} className={`cal-event ${catClass(e.category)}`} onClick={() => openEdit(e)}>
+                    <button key={e.id} className={`cal-event ${catClass(e.category)} ${e.source !== 'manual' ? 'is-feed' : ''}`} onClick={() => openEdit(e)}>
                       {e.event_time && <span className="cal-event-time mono">{fmtTime(e.event_time)}</span>}
                       {e.symbol && <span className="cal-event-symbol mono">{e.symbol}</span>}
                       <span className="cal-event-title">{e.title}</span>
@@ -387,7 +502,7 @@ export default function Calendar() {
                   {list.map((e) => (
                     <button
                       key={e.id}
-                      className={`cal-chip ${catClass(e.category)}`}
+                      className={`cal-chip ${catClass(e.category)} ${e.source !== 'manual' ? 'is-feed' : ''}`}
                       onClick={(ev) => {
                         ev.stopPropagation();
                         openEdit(e);
@@ -407,6 +522,10 @@ export default function Calendar() {
 
       {!loading && (
         <div className="cal-legend">
+          <span className="cal-legend-item">
+            <span className="cal-swatch is-feed" />
+            Dashed = From Feed
+          </span>
           {CATEGORIES.map((c) => (
             <span key={c} className="cal-legend-item">
               <span className={`cal-swatch ${catClass(c)}`} />

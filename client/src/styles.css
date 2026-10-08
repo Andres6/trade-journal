@@ -1094,3 +1094,158 @@ textarea {
   min-width: 0.7em;
   font-size: 0.6rem;
 }
+
+/* ---------- Calendar: Finnhub feed ---------- */
+.cal-event.is-feed,
+.cal-chip.is-feed {
+  border-left-style: dashed;
+}
+
+.cal-swatch.is-feed {
+  background: none;
+  border: 1px dashed var(--ink-faint);
+}
+
+.cal-feed {
+  margin-bottom: 1.25rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--paper-card);
+}
+
+.cal-feed summary {
+  cursor: pointer;
+  padding: 0.6rem 0.9rem;
+  font-size: 0.82rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.cal-feed-body {
+  padding: 0.25rem 0.9rem 0.9rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.cal-feed-msg {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--ink);
+}
+
+.cal-feed-label {
+  font-size: 0.72rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+.cal-feed-symbols {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.cal-sym {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.15rem 0.5rem;
+  border: 1px solid var(--rule-strong);
+  border-radius: 999px;
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--ink);
+}
+
+.cal-sym-auto {
+  border-style: dashed;
+  color: var(--ink-faint);
+}
+
+.cal-sym button {
+  all: unset;
+  cursor: pointer;
+  color: var(--ink-faint);
+  line-height: 1;
+}
+
+.cal-sym button:hover {
+  color: var(--loss);
+}
+
+.cal-feed-add {
+  display: flex;
+  gap: 0.5rem;
+  max-width: 22rem;
+}
+
+.cal-feed-add input {
+  flex: 1;
+  min-width: 0;
+}
+
+.cal-feed-hint {
+  margin: 0;
+  font-size: 0.76rem;
+  color: var(--ink-faint);
+}
+
+/* ---------- Compact symbol list (Calendar feed + Settings watchlist) ---------- */
+.sym-list {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(4.75rem, 1fr));
+  gap: 0.25rem 0.4rem;
+  max-height: 9rem;
+  overflow-y: auto;
+  padding: 0.5rem;
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  background: var(--paper);
+}
+
+.sym-list-manage {
+  max-height: 13rem;
+  grid-template-columns: repeat(auto-fill, minmax(6rem, 1fr));
+}
+
+.sym-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.25rem;
+  padding: 0.2rem 0.4rem;
+  font-family: var(--font-mono);
+  font-size: 0.8rem;
+  color: var(--ink);
+  border-radius: 2px;
+  white-space: nowrap;
+}
+
+.sym-item:hover {
+  background: var(--paper-stripe);
+}
+
+.sym-item.is-auto {
+  font-style: italic;
+  color: var(--ink-faint);
+}
+
+.sym-item button {
+  all: unset;
+  cursor: pointer;
+  padding: 0 0.2rem;
+  color: var(--ink-faint);
+  line-height: 1;
+}
+
+.sym-item button:hover {
+  color: var(--loss);
+}
+
+.sym-legend {
+  margin: 0.4rem 0 0;
+  font-size: 0.74rem;
+}

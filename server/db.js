@@ -73,6 +73,15 @@ db.exec(`
     updated_at TEXT NOT NULL DEFAULT (datetime('now'))
   );
 
+  -- Extra symbols to pull earnings dates for (open-position symbols are automatic).
+  CREATE TABLE IF NOT EXISTS watchlist (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    symbol TEXT NOT NULL,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    UNIQUE (user_id, symbol)
+  );
+
   CREATE TABLE IF NOT EXISTS schwab_tokens (
     id INTEGER PRIMARY KEY CHECK (id = 1),
     access_token TEXT,
@@ -135,6 +144,19 @@ function migrateOwnership() {
   }
 }
 
+// --- Migration: calendar events gain two flags for imported (Finnhub) rows ---
+//   hidden: the user deleted an imported event; keep the row so sync never re-adds it
+//   edited: the user changed an imported event; sync leaves it alone from then on
+function migrateEvents() {
+  if (!columnExists('events', 'hidden')) {
+    db.exec('ALTER TABLE events ADD COLUMN hidden INTEGER NOT NULL DEFAULT 0');
+  }
+  if (!columnExists('events', 'edited')) {
+    db.exec('ALTER TABLE events ADD COLUMN edited INTEGER NOT NULL DEFAULT 0');
+  }
+}
+
+migrateEvents();
 migrateOwnership();
 
 module.exports = db;

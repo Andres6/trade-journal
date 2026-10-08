@@ -1,6 +1,78 @@
 import React, { useEffect, useState } from 'react';
 import { api, fmtMoney } from '../lib/api.js';
 
+// Calendar watchlist: extra tickers whose earnings get pulled on sync,
+// on top of the symbols in open positions. Available to every account.
+function WatchlistSection() {
+  const [symbols, setSymbols] = useState(null);
+  const [input, setInput] = useState('');
+  const [msg, setMsg] = useState('');
+
+  function load() {
+    api.calendarStatus().then((s) => setSymbols(s.watchlist)).catch((e) => setMsg(e.message));
+  }
+  useEffect(load, []);
+
+  async function add(e) {
+    e.preventDefault();
+    if (!input.trim()) return;
+    try {
+      await api.addWatchSymbol(input);
+      setInput('');
+      setMsg('');
+      load();
+    } catch (err) {
+      setMsg(err.message);
+    }
+  }
+
+  async function remove(sym) {
+    try {
+      await api.removeWatchSymbol(sym);
+      load();
+    } catch (err) {
+      setMsg(err.message);
+    }
+  }
+
+  return (
+    <section className="section">
+      <h2>Calendar watchlist</h2>
+      <p className="muted">
+        Earnings are pulled for every symbol in your open positions, plus the tickers below. Use
+        this for stocks you're watching but don't hold yet.
+      </p>
+      <div className="card">
+        <div className="cal-feed-label">{symbols ? `${symbols.length} ticker${symbols.length === 1 ? '' : 's'}` : ''}</div>
+        <div className="sym-list sym-list-manage">
+          {symbols === null && <span className="muted">Loading…</span>}
+          {symbols && symbols.length === 0 && <span className="muted">No tickers on the watchlist.</span>}
+          {(symbols || []).map((sym) => (
+            <span key={sym} className="sym-item">
+              {sym}
+              <button type="button" aria-label={`Remove ${sym}`} onClick={() => remove(sym)}>
+                ×
+              </button>
+            </span>
+          ))}
+        </div>
+        <form className="cal-feed-add" onSubmit={add} style={{ marginTop: '0.9rem' }}>
+          <input
+            value={input}
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Add a ticker, e.g. NVDA"
+            maxLength={10}
+          />
+          <button type="submit" className="btn">
+            Add
+          </button>
+        </form>
+        {msg && <p className="form-error">{msg}</p>}
+      </div>
+    </section>
+  );
+}
+
 export default function Settings({ isAdmin }) {
   const [connected, setConnected] = useState(null);
   const [days, setDays] = useState(14);
@@ -104,13 +176,10 @@ export default function Settings({ isAdmin }) {
         <div className="page-head">
           <div>
             <div className="eyebrow">Settings</div>
-            <h1>Nothing here yet</h1>
+            <h1>Preferences</h1>
           </div>
         </div>
-        <p className="muted">
-          Guest accounts don't have any settings to manage — this page is only used by the account
-          owner.
-        </p>
+        <WatchlistSection />
       </div>
     );
   }
@@ -235,6 +304,8 @@ export default function Settings({ isAdmin }) {
           {error && <div className="form-error">{error}</div>}
         </div>
       </section>
+
+      <WatchlistSection />
 
       {legs.length > 0 && (
         <section className="section">

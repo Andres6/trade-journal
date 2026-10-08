@@ -55,6 +55,12 @@ export const api = {
   updateEvent: (id, data) => request(`/events/${id}`, { method: 'PATCH', body: JSON.stringify(data) }),
   deleteEvent: (id) => request(`/events/${id}`, { method: 'DELETE' }),
 
+  // calendar feed (Finnhub)
+  calendarStatus: () => request('/calendar/status'),
+  calendarSync: (only = 'both') => request('/calendar/sync', { method: 'POST', body: JSON.stringify({ only }) }),
+  addWatchSymbol: (symbol) => request('/calendar/watchlist', { method: 'POST', body: JSON.stringify({ symbol }) }),
+  removeWatchSymbol: (symbol) => request(`/calendar/watchlist/${encodeURIComponent(symbol)}`, { method: 'DELETE' }),
+
   // schwab
   schwabStatus: () => request('/schwab/status'),
   schwabAuthUrl: () => request('/schwab/auth-url'),
