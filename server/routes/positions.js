@@ -52,6 +52,11 @@ router.get('/', (req, res) => {
       .prepare('SELECT trade_date, structure FROM trades WHERE position_id = ? ORDER BY trade_date ASC LIMIT 1')
       .get(p.id);
     
+    // Get the most recent trade date for this position
+    const latestTrade = db
+      .prepare('SELECT MAX(trade_date) AS d FROM trades WHERE position_id = ?')
+      .get(p.id);
+
     let actualOpenedAt = p.opened_at;
     let expirationDate = null;
     if (earliestTrade) {
@@ -64,7 +69,8 @@ router.get('/', (req, res) => {
       net_total: realized_or_running, 
       trade_count: tradeCount,
       opened_at: actualOpenedAt,
-      expiration_date: expirationDate
+      expiration_date: expirationDate,
+      last_trade_date: latestTrade ? latestTrade.d : null
     };
   });
   res.json(withTotals);

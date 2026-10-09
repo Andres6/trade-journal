@@ -19,7 +19,13 @@ export default function Positions() {
   const [comment, setComment] = useState('');
   const [error, setError] = useState('');
   const [creating, setCreating] = useState(false);
-  const { sorted, sort, toggleSort } = useSortedRows(positions);
+  const { sorted, sort, toggleSort, resetSort } = useSortedRows(positions);
+  const isOpen = filter === 'open';
+
+  // If the active sort column is hidden on this tab, fall back to the default sort.
+  useEffect(() => {
+    if ((isOpen && sort.key === 'closed') || (!isOpen && sort.key === 'last')) resetSort();
+  }, [filter]);
 
   function load() {
     setLoading(true);
@@ -115,13 +121,14 @@ export default function Positions() {
         <div className="empty-state">Nothing here yet.</div>
       )}
       {!loading && positions.length > 0 && (
-        <div className="table-scroll" style={{ '--table-min-width': '750px' }}>
+        <div className="table-scroll" style={{ '--table-min-width': isOpen ? '740px' : '750px' }}>
         <table className="ledger-table">
           <colgroup>
             <col style={{ width: '90px' }} />
             <col style={{ width: '100px' }} />
+            {isOpen && <col style={{ width: '100px' }} />}
             <col style={{ width: '120px' }} />
-            <col style={{ width: '100px' }} />
+            {!isOpen && <col style={{ width: '100px' }} />}
             <col style={{ width: '60px' }} />
             <col style={{ width: '120px' }} />
             <col style={{ width: '150px' }} />
@@ -129,9 +136,10 @@ export default function Positions() {
           <thead>
             <tr>
               <th>Symbol</th>
+              {isOpen && <SortableTh label="Last" sortKey="last" sort={sort} onSort={toggleSort} />}
               <SortableTh label="Opened" sortKey="opened" sort={sort} onSort={toggleSort} />
               <SortableTh label="Expiration" sortKey="expiration" sort={sort} onSort={toggleSort} />
-              <SortableTh label="Closed" sortKey="closed" sort={sort} onSort={toggleSort} />
+              {!isOpen && <SortableTh label="Closed" sortKey="closed" sort={sort} onSort={toggleSort} />}
               <th>Trades</th>
               <th>Running total</th>
               <th>Status</th>
@@ -145,9 +153,10 @@ export default function Positions() {
                     {p.symbol}
                   </Link>
                 </td>
+                {isOpen && <td className="mono">{fmtDate(p.last_trade_date)}</td>}
                 <td className="mono">{fmtDate(p.opened_at)}</td>
                 <td className="mono">{fmtDate(p.expiration_date)}</td>
-                <td className="mono">{fmtDate(p.closed_at)}</td>
+                {!isOpen && <td className="mono">{fmtDate(p.closed_at)}</td>}
                 <td className="mono">{p.trade_count}</td>
                 <td className={`mono ${p.net_total >= 0 ? 'pl-gain' : 'pl-loss'}`}>
                   {fmtMoney(p.net_total)}

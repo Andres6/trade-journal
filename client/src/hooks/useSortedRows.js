@@ -2,13 +2,13 @@ import { useMemo, useState } from 'react';
 import { dateKey } from '../lib/dates.js';
 
 // Maps a sort key to the field it reads from a position row.
-const FIELD = { opened: 'opened_at', expiration: 'expiration_date', closed: 'closed_at' };
+const FIELD = { opened: 'opened_at', expiration: 'expiration_date', closed: 'closed_at', last: 'last_trade_date' };
 // First click direction per column: most recent first, except expiration (soonest first).
-const FIRST_DIR = { opened: 'desc', expiration: 'asc', closed: 'desc' };
+const FIRST_DIR = { opened: 'desc', expiration: 'asc', closed: 'desc', last: 'desc' };
 
-// Default: newest opened at the top.
+// Default: most recently traded at the top.
 export function useSortedRows(rows) {
-  const [sort, setSort] = useState({ key: 'opened', dir: 'desc' });
+  const [sort, setSort] = useState({ key: 'last', dir: 'desc' });
 
   function toggleSort(key) {
     setSort((s) =>
@@ -16,6 +16,10 @@ export function useSortedRows(rows) {
         ? { key, dir: s.dir === 'asc' ? 'desc' : 'asc' }
         : { key, dir: FIRST_DIR[key] || 'desc' }
     );
+  }
+
+  function resetSort() {
+    setSort({ key: 'opened', dir: 'desc' });
   }
 
   const sorted = useMemo(() => {
@@ -33,5 +37,5 @@ export function useSortedRows(rows) {
     });
   }, [rows, sort]);
 
-  return { sorted, sort, toggleSort };
+  return { sorted, sort, toggleSort, resetSort };
 }

@@ -54,10 +54,11 @@ export default function Dashboard() {
           </div>
         )}
         {!loading && openPositions.length > 0 && (
-          <div className="table-scroll" style={{ '--table-min-width': '580px' }}>
+          <div className="table-scroll" style={{ '--table-min-width': '710px' }}>
           <table className="ledger-table">
             <colgroup>
               <col style={{ width: '100px' }} />
+              <col style={{ width: '110px' }} />
               <col style={{ width: '110px' }} />
               <col style={{ width: '120px' }} />
               <col style={{ width: '120px' }} />
@@ -66,6 +67,7 @@ export default function Dashboard() {
             <thead>
               <tr>
                 <th>Symbol</th>
+                <SortableTh label="Last" sortKey="last" sort={sort} onSort={toggleSort} />
                 <SortableTh label="Opened" sortKey="opened" sort={sort} onSort={toggleSort} />
                 <SortableTh label="Expiration" sortKey="expiration" sort={sort} onSort={toggleSort} />
                 <th>Running total</th>
@@ -80,6 +82,7 @@ export default function Dashboard() {
                       {p.symbol}
                     </Link>
                   </td>
+                  <td className="mono">{fmtDate(p.last_trade_date)}</td>
                   <td className="mono">{fmtDate(p.opened_at)}</td>
                   <td className="mono">{fmtDate(p.expiration_date)}</td>
                   <td className={`mono ${p.net_total >= 0 ? 'pl-gain' : 'pl-loss'}`}>
