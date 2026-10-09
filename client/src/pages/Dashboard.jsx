@@ -68,7 +68,7 @@ export default function Dashboard() {
               <tr>
                 <th>Symbol</th>
                 <SortableTh label="Last" sortKey="last" sort={sort} onSort={toggleSort} />
-                <SortableTh label="Opened" sortKey="opened" sort={sort} onSort={toggleSort} />
+                <SortableTh label="Open" sortKey="opened" sort={sort} onSort={toggleSort} />
                 <SortableTh label="Expiration" sortKey="expiration" sort={sort} onSort={toggleSort} />
                 <th>Running total</th>
                 <th>Status</th>

@@ -137,7 +137,7 @@ export default function Positions() {
             <tr>
               <th>Symbol</th>
               {isOpen && <SortableTh label="Last" sortKey="last" sort={sort} onSort={toggleSort} />}
-              <SortableTh label="Opened" sortKey="opened" sort={sort} onSort={toggleSort} />
+              <SortableTh label="Open" sortKey="opened" sort={sort} onSort={toggleSort} />
               <SortableTh label="Expiration" sortKey="expiration" sort={sort} onSort={toggleSort} />
               {!isOpen && <SortableTh label="Closed" sortKey="closed" sort={sort} onSort={toggleSort} />}
               <th>Trades</th>
