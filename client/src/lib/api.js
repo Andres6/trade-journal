@@ -58,6 +58,7 @@ export const api = {
   // calendar feed (Finnhub)
   calendarStatus: () => request('/calendar/status'),
   calendarSync: (only = 'both') => request('/calendar/sync', { method: 'POST', body: JSON.stringify({ only }) }),
+  calendarSyncStatus: () => request('/calendar/sync/status'),
   addWatchSymbol: (symbol) => request('/calendar/watchlist', { method: 'POST', body: JSON.stringify({ symbol }) }),
   removeWatchSymbol: (symbol) => request(`/calendar/watchlist/${encodeURIComponent(symbol)}`, { method: 'DELETE' }),
 

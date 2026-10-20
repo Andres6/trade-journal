@@ -7,8 +7,10 @@ const TZ = process.env.CALENDAR_TIMEZONE || 'America/New_York';
 // Keep the calendar lean: a short look-ahead, a hard cap on symbols, and only
 // high-impact US economic releases.
 const EARNINGS_DAYS_AHEAD = 60;
-const MAX_SYMBOLS = 40;
-const THROTTLE_MS = 300; // free tier allows ~60 calls/minute
+const MAX_SYMBOLS = 300; // safety ceiling only; the sync runs in the background so size isn't a timeout risk
+const THROTTLE_MS = 1100; // free tier allows 60 calls/minute, so stay just under 1 call/second
+const RATE_RETRY_MS = 15000; // on a 429, wait this long and retry the same symbol
+const RATE_RETRIES = 3;
 
 // Indexes and big ETFs never report earnings; skip them to save API calls.
 const NO_EARNINGS = new Set([
@@ -177,39 +179,57 @@ function watchlistSymbols(db, userId) {
 function trackedSymbols(db, userId) {
   const all = [...new Set([...openPositionSymbols(db, userId), ...watchlistSymbols(db, userId)])];
   const usable = all.filter((s) => SYMBOL_RE.test(s) && !NO_EARNINGS.has(s));
-  return { usable: usable.slice(0, MAX_SYMBOLS), skipped: all.filter((s) => !usable.includes(s)) };
+  const capped = usable.slice(0, MAX_SYMBOLS);
+  return {
+    usable: capped,
+    skipped: all.filter((s) => !usable.includes(s)),
+    truncated: usable.slice(MAX_SYMBOLS), // only non-empty past MAX_SYMBOLS
+  };
 }
 
 // ---------- the sync ----------
 // Earnings (Finnhub) and economic dates (FRED) are independent: a failure in
 // one never stops the other.
 
-async function syncEarnings({ db, userId, client, today, sleep }) {
-  const out = { symbols: 0, added: 0, updated: 0, failed: [], stopped: null, skipped: [] };
+async function syncEarnings({ db, userId, client, today, sleep, onProgress }) {
+  const out = { symbols: 0, added: 0, updated: 0, failed: [], stopped: null, skipped: [], truncated: [] };
   if (!client) { out.stopped = 'not_configured'; return out; }
 
-  const { usable, skipped } = trackedSymbols(db, userId);
+  const { usable, skipped, truncated } = trackedSymbols(db, userId);
   out.skipped = skipped;
+  out.truncated = truncated;
   out.symbols = usable.length;
+  if (onProgress) onProgress(0, usable.length);
 
   const to = addDaysISO(today, EARNINGS_DAYS_AHEAD);
+  let done = 0;
   for (const symbol of usable) {
-    try {
-      const rows = await client.earnings(symbol, today, to);
-      for (const row of rows) {
-        const ev = mapEarnings(row);
-        if (!ev) continue;
-        const res = upsertEvent(db, userId, ev);
-        if (res === 'added') out.added += 1;
-        if (res === 'updated') out.updated += 1;
+    let attempts = 0;
+    for (;;) {
+      try {
+        const rows = await client.earnings(symbol, today, to);
+        for (const row of rows) {
+          const ev = mapEarnings(row);
+          if (!ev) continue;
+          const res = upsertEvent(db, userId, ev);
+          if (res === 'added') out.added += 1;
+          if (res === 'updated') out.updated += 1;
+        }
+      } catch (err) {
+        if (err.kind === 'auth') { out.stopped = 'auth'; return out; }
+        if (err.kind === 'rate') {
+          // Wait out the per-minute window and retry this same symbol.
+          attempts += 1;
+          if (attempts > RATE_RETRIES) { out.stopped = 'rate'; return out; }
+          await sleep(RATE_RETRY_MS);
+          continue;
+        }
+        out.failed.push(symbol);
       }
-    } catch (err) {
-      if (err.kind === 'auth' || err.kind === 'rate') {
-        out.stopped = err.kind;
-        return out;
-      }
-      out.failed.push(symbol);
+      break;
     }
+    done += 1;
+    if (onProgress) onProgress(done, usable.length);
     await sleep(THROTTLE_MS);
   }
   return out;
@@ -250,11 +270,12 @@ async function runSync({
   fred = require('./fred'),
   fredKey = process.env.FRED_API_KEY,
   only = 'both', // 'both' | 'earnings' | 'economic'
+  onProgress,
 }) {
   const today = isoInTz(now, tz);
   const result = {};
   if (only !== 'economic') {
-    result.earnings = await syncEarnings({ db, userId, client, today, sleep });
+    result.earnings = await syncEarnings({ db, userId, client, today, sleep, onProgress });
   }
   if (only !== 'earnings') {
     result.economic = await syncEconomic({ db, userId, today, fred, apiKey: fredKey });

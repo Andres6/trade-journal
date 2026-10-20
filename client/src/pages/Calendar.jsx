@@ -56,6 +56,7 @@ function describeEarnings(e) {
   if (e.stopped === 'rate') parts.push('stopped early: rate limit, try again in a minute');
   if (e.stopped === 'auth') parts.push('Finnhub rejected the API key');
   if (e.failed.length) parts.push(`could not fetch ${e.failed.join(', ')}`);
+  if (e.truncated && e.truncated.length) parts.push(`${e.truncated.length} symbol(s) over the limit were skipped`);
   return parts.join(' · ');
 }
 
@@ -139,9 +140,21 @@ export default function Calendar() {
     setSyncing(true);
     setSyncMsg('');
     try {
-      const result = await api.calendarSync('earnings');
-      setSyncMsg(describeEarnings(result.earnings));
+      await api.calendarSync('earnings');
+      // The server works through the list in the background; poll until done.
+      for (;;) {
+        await new Promise((r) => setTimeout(r, 1500));
+        const st = await api.calendarSyncStatus();
+        if (st.running) {
+          setSyncMsg(`Syncing… ${st.done} of ${st.total} symbols`);
+          continue;
+        }
+        if (st.error) throw new Error(st.error);
+        if (st.result) setSyncMsg(describeEarnings(st.result.earnings));
+        break;
+      }
       load();
+      loadFeed();
     } catch (err) {
       setSyncMsg(err.message);
     } finally {

@@ -5,7 +5,10 @@ const finnhub = require('../lib/finnhub');
 
 const router = express.Router();
 
-let syncing = false; // one sync at a time keeps us under Finnhub's rate limit
+// One sync at a time keeps us under Finnhub's rate limit. Earnings can take a
+// couple of minutes for a long watchlist (1 call/sec), so it runs in the
+// background and the client polls /sync/status.
+let job = null; // { userId, running, done, total, result, error }
 
 // GET /api/calendar/status
 router.get('/status', (req, res) => {
@@ -23,23 +26,48 @@ router.get('/status', (req, res) => {
 });
 
 // POST /api/calendar/sync   body: { only?: 'both' | 'earnings' | 'economic' }
-// Runs whichever sources have keys. Each source reports its own status.
+// Economic (FRED) is quick and returns its result directly. Earnings starts a
+// background job and returns 202; poll GET /api/calendar/sync/status.
 router.post('/sync', async (req, res) => {
   const only = ['both', 'earnings', 'economic'].includes(req.body && req.body.only) ? req.body.only : 'both';
-  if (syncing) return res.status(409).json({ error: 'A sync is already running. Try again in a moment.' });
-  syncing = true;
+  if (job && job.running) return res.status(409).json({ error: 'A sync is already running. Try again in a moment.' });
+  const userId = req.session.userId;
+
   try {
+    if (only === 'economic') {
+      return res.json(await finnhub.runSync({ db, userId, client: null, only: 'economic' }));
+    }
+
     const client = finnhub.isConfigured()
       ? finnhub.createClient({ apiKey: process.env.FINNHUB_API_KEY, http: axios })
       : null;
-    const result = await finnhub.runSync({ db, userId: req.session.userId, client, only });
-    res.json(result);
+
+    const current = { userId, running: true, done: 0, total: 0, result: null, error: null };
+    job = current;
+    finnhub
+      .runSync({
+        db, userId, client, only,
+        onProgress: (done, total) => { current.done = done; current.total = total; },
+      })
+      .then((result) => { current.result = result; })
+      .catch((err) => {
+        console.error('Calendar sync error:', err.message);
+        current.error = 'Sync failed. Check server logs.';
+      })
+      .finally(() => { current.running = false; });
+
+    res.status(202).json({ started: true });
   } catch (err) {
     console.error('Calendar sync error:', err.message);
     res.status(500).json({ error: 'Sync failed. Check server logs.' });
-  } finally {
-    syncing = false;
   }
+});
+
+// GET /api/calendar/sync/status
+router.get('/sync/status', (req, res) => {
+  if (!job || job.userId !== req.session.userId) return res.json({ running: false, idle: true });
+  const { running, done, total, result, error } = job;
+  res.json({ running, done, total, result, error });
 });
 
 // POST /api/calendar/watchlist  { symbol }
