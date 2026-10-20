@@ -89,6 +89,10 @@ function createClient({ apiKey, http = axios }) {
       const data = await get('/calendar/earnings', { symbol, from, to });
       return (data && data.earningsCalendar) || [];
     },
+    async companyNews(symbol, from, to) {
+      const data = await get('/company-news', { symbol, from, to });
+      return Array.isArray(data) ? data : [];
+    },
   };
 }
 
@@ -287,4 +291,5 @@ module.exports = {
   FinnhubError, isConfigured, createClient, runSync,
   syncEarnings, syncEconomic,
   mapEarnings, utcToLocal, trackedSymbols, SYMBOL_RE,
+  isoInTz, addDaysISO, THROTTLE_MS, RATE_RETRY_MS, RATE_RETRIES, TZ,
 };

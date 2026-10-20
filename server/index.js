@@ -10,6 +10,7 @@ const tradesRouter = require('./routes/trades');
 const notesRouter = require('./routes/notes');
 const eventsRouter = require('./routes/events');
 const calendarRouter = require('./routes/calendar');
+const newsRouter = require('./routes/news');
 const schwabRouter = require('./routes/schwab');
 
 const app = express();
@@ -39,6 +40,7 @@ app.use('/api/trades', requireAuth, tradesRouter);
 app.use('/api/notes', requireAuth, notesRouter);
 app.use('/api/events', requireAuth, eventsRouter);
 app.use('/api/calendar', requireAuth, calendarRouter);
+app.use('/api/news', requireAuth, newsRouter);
 app.use('/api/schwab', requireAuth, requireAdmin, schwabRouter);
 
 // Schwab redirects the browser here directly, outside the fetch/XHR session

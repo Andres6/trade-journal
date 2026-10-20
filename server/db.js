@@ -82,6 +82,21 @@ db.exec(`
     UNIQUE (user_id, symbol)
   );
 
+  -- Company headlines pulled from Finnhub for open-position + watchlist symbols.
+  -- Headlines only (no article bodies); old rows are pruned on each sync.
+  CREATE TABLE IF NOT EXISTS news (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id INTEGER NOT NULL REFERENCES users(id),
+    symbol TEXT NOT NULL,
+    headline TEXT NOT NULL,
+    source TEXT,
+    url TEXT NOT NULL,
+    published_at INTEGER NOT NULL,                -- unix seconds (UTC)
+    external_id TEXT NOT NULL,                    -- Finnhub's article id (or a url fallback)
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    UNIQUE (user_id, symbol, external_id)
+  );
+
   CREATE TABLE IF NOT EXISTS schwab_tokens (
     id INTEGER PRIMARY KEY CHECK (id = 1),
     access_token TEXT,
@@ -94,6 +109,7 @@ db.exec(`
   CREATE INDEX IF NOT EXISTS idx_trades_position ON trades(position_id);
   CREATE INDEX IF NOT EXISTS idx_positions_status ON positions(status);
   CREATE INDEX IF NOT EXISTS idx_events_date ON events(user_id, event_date);
+  CREATE INDEX IF NOT EXISTS idx_news_published ON news(user_id, published_at);
   CREATE UNIQUE INDEX IF NOT EXISTS idx_events_external
     ON events(user_id, source, external_id) WHERE external_id IS NOT NULL;
 `);

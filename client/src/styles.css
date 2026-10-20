@@ -1249,3 +1249,105 @@ textarea {
   margin: 0.4rem 0 0;
   font-size: 0.74rem;
 }
+
+/* ---------- News ---------- */
+.news-filters {
+  display: flex;
+  align-items: center;
+  gap: 0.9rem;
+  flex-wrap: wrap;
+}
+
+.news-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.85rem;
+  color: var(--ink);
+  cursor: pointer;
+}
+
+.news-group {
+  margin-bottom: 1.4rem;
+}
+
+.news-group-head {
+  display: flex;
+  align-items: baseline;
+  gap: 0.6rem;
+  margin: 0 0 0.5rem;
+  font-size: 1rem;
+}
+
+.news-group-sym {
+  font-weight: 600;
+  letter-spacing: 0.04em;
+}
+
+.news-group-sym.is-auto {
+  font-style: italic;
+}
+
+.news-count {
+  font-size: 0.75rem;
+  color: var(--ink-faint);
+}
+
+.news-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.news-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  background: var(--paper-card);
+  border: 1px solid var(--rule);
+  border-radius: var(--radius);
+  padding: 0.5rem 0.7rem;
+  color: var(--ink);
+  text-decoration: none;
+  transition: border-color 0.2s ease;
+}
+
+.news-item:hover {
+  border-color: var(--ink);
+}
+
+.news-meta {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  font-size: 0.74rem;
+  color: var(--ink-faint);
+}
+
+.news-sym {
+  font-weight: 600;
+  color: var(--ink);
+}
+
+.news-headline {
+  font-size: 0.92rem;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+
+.news-more {
+  margin-top: 0.4rem;
+  background: none;
+  border: none;
+  padding: 0;
+  font-family: var(--font-body);
+  font-size: 0.8rem;
+  color: var(--ink-faint);
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.news-more:hover {
+  color: var(--ink);
+}

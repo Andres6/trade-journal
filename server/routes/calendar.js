@@ -2,6 +2,7 @@ const express = require('express');
 const axios = require('axios');
 const db = require('../db');
 const finnhub = require('../lib/finnhub');
+const syncLock = require('../lib/syncLock');
 
 const router = express.Router();
 
@@ -30,12 +31,16 @@ router.get('/status', (req, res) => {
 // background job and returns 202; poll GET /api/calendar/sync/status.
 router.post('/sync', async (req, res) => {
   const only = ['both', 'earnings', 'economic'].includes(req.body && req.body.only) ? req.body.only : 'both';
-  if (job && job.running) return res.status(409).json({ error: 'A sync is already running. Try again in a moment.' });
   const userId = req.session.userId;
 
   try {
     if (only === 'economic') {
       return res.json(await finnhub.runSync({ db, userId, client: null, only: 'economic' }));
+    }
+
+    // Earnings uses Finnhub, which is shared with the News sync: one at a time.
+    if (!syncLock.tryAcquire()) {
+      return res.status(409).json({ error: 'A Finnhub sync is already running. Try again in a moment.' });
     }
 
     const client = finnhub.isConfigured()
@@ -54,7 +59,10 @@ router.post('/sync', async (req, res) => {
         console.error('Calendar sync error:', err.message);
         current.error = 'Sync failed. Check server logs.';
       })
-      .finally(() => { current.running = false; });
+      .finally(() => {
+        current.running = false;
+        syncLock.release();
+      });
 
     res.status(202).json({ started: true });
   } catch (err) {

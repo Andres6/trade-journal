@@ -45,6 +45,9 @@ export default function Nav({ onLogout, isAdmin, username }) {
         <NavLink to="/calendar" className={({ isActive }) => (isActive ? 'active' : '')}>
           Calendar
         </NavLink>
+        <NavLink to="/news" className={({ isActive }) => (isActive ? 'active' : '')}>
+          News
+        </NavLink>
         <NavLink to="/notes" className={({ isActive }) => (isActive ? 'active' : '')}>
           Notes &amp; Lessons
         </NavLink>
